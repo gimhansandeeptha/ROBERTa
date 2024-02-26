@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from training import load_data, get_required_data, split
+from data import load_data, get_required_data, split
 from transformers import RobertaModel, RobertaTokenizer
 from roberta import RobertaClass
 import processor
@@ -85,9 +85,9 @@ class BuildModel():
         self.device = device
         self.model = model 
 
-    def train(self,df, learning_rate):
+    def train(self,df, learning_rate, max_len, train_batch_size,validation_batch_size):
         self.model.to(self.device)
         data_handler = DataHandler(df)
-        training_loader, testing_loader, validation_loader = data_handler.get_dataloaders(self.tokenizer,)
+        training_loader, testing_loader, validation_loader = data_handler.get_dataloaders(self.tokenizer,max_len, train_batch_size, validation_batch_size)
         train = robertaTrain(self.model,learning_rate)
-        train.train(training_loader, validation_loader)
+        train.train(training_loader, validation_loader,self.device)
