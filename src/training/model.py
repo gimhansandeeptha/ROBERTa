@@ -2,12 +2,14 @@ import torch
 from torch.utils.data import DataLoader
 from training import load_data, get_required_data, split
 from transformers import RobertaModel, RobertaTokenizer
+from roberta import RobertaClass
+import processor
+from train import train
 
 class SentimentData():
     '''
     Custom class for handling sentiment data. To be able to pass to the DataLoader.
     __getitem__ function do the tokenization for each text sample.
-
     '''
     def __init__(self, x, y, tokenizer, max_len):
         self.tokenizer = tokenizer
@@ -42,31 +44,6 @@ class SentimentData():
             'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
             'targets': torch.tensor(self.targets[index], dtype=torch.float)
         }
-
-class RobertaClass(torch.nn.Module):
-  '''
-  Custom PyTorch module for sentiment analysis using a fine-tuned RoBERTa model.
-  - l1: Pre-trained RoBERTa model loaded from "roberta-base" using Hugging Face Transformers.
-  - pre_classifier: Linear layer for additional transformation before classification.
-  - dropout: Dropout layer for regularization.
-  - classifier: Linear layer for final sentiment classification.
-  '''
-  def __init__(self):
-      super(RobertaClass, self).__init__()
-      self.l1 = RobertaModel.from_pretrained("roberta-base")
-      self.pre_classifier = torch.nn.Linear(768, 768)
-      self.dropout = torch.nn.Dropout(0.3)
-      self.classifier = torch.nn.Linear(768, 3)
-
-  def forward(self, input_ids, attention_mask, token_type_ids):
-      output_1 = self.l1(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
-      hidden_state = output_1[0]
-      pooler = hidden_state[:, 0]
-      pooler = self.pre_classifier(pooler)
-      pooler = torch.nn.ReLU()(pooler)
-      pooler = self.dropout(pooler)
-      output = self.classifier(pooler)
-      return output
   
 
 MAX_LEN = 256
@@ -83,7 +60,7 @@ new_df = get_required_data(df)
 
 x_train, y_train, x_test, y_test, x_val, y_val = split(new_df)
 
-print(f"{x_train[:3]}\n {y_train[:3]} \n {x_test[:3]} \n {y_test[:3]} \n {x_val[:3]} \n {y_val[:3]}")
+# print(f"{x_train[:3]}\n {y_train[:3]} \n {x_test[:3]} \n {y_test[:3]} \n {x_val[:3]} \n {y_val[:3]}")
 
 training_set = SentimentData(x_train, y_train, tokenizer, MAX_LEN)
 testing_set = SentimentData(x_train, y_train, tokenizer, MAX_LEN)
@@ -109,11 +86,23 @@ testing_loader = DataLoader(testing_set, **test_params)
 validation_loader = DataLoader(validation_set, **validation_params)
 
 
-# Iterate over a few batches from the training loader and print samples
-for batch in training_loader:
-    print("Batch Sample:")
-    print("Input IDs:", batch['ids'])
-    print("Attention Mask:", batch['mask'])
-    print("Token Type IDs:", batch['token_type_ids'])
-    print("Targets:", batch['targets'])
-    break  # Break after the first batch to view a few samples
+# # Iterate over a few batches from the training loader and print samples
+# for batch in training_loader:
+#     print("Batch Sample:")
+#     print("Input IDs:", batch['ids'])
+#     print("Attention Mask:", batch['mask'])
+#     print("Token Type IDs:", batch['token_type_ids'])
+#     print("Targets:", batch['targets'])
+#     break  # Break after the first batch to view a few samples
+
+device = processor.get_device()
+model = RobertaClass()
+model.to(device)
+
+# Creating the loss function and optimizer
+loss_function = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(params =  model.parameters(), lr=LEARNING_RATE)
+
+print("About to start training...")
+train(model, training_loader, validation_loader, loss_function, optimizer, device, epochs=5)
+print("Training was done.")
