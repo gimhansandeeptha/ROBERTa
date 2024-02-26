@@ -3,7 +3,6 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
 
-
 def load_data():
     json_file_path = "D:\Gimhan Sandeeptha\Gimhan\Sentiment-Email\ROBERTa_production\data\Software.json"
     with open(json_file_path) as f:
@@ -36,7 +35,6 @@ def get_required_data(df):
     new_df['overall'] = new_df['overall'].replace(label_mapping)
     shuffled_df = new_df.sample(frac=1, random_state=42).reset_index(drop=True)
     return shuffled_df
-
 
 def split(df):
     X,y = df['reviewText'].values,df['overall'].values

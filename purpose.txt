@@ -1,0 +1,7 @@
+Training Module 
+    roberta: Model for spesific roberta architecture 
+    main   : all the different configurations : main file for defining the flow for wanted models, define varibales for training.
+    processor : return the processor either cpu or specific gpu depend on the availability.
+    data : data loading and other data cleaning handling stuff
+    train : specific implimentation for training : will be used by generic model.py
+    model : model building and training generic file.  
