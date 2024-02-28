@@ -1,0 +1,3 @@
+The dataset is Software review dataset in amazon.
+Dataset can be directly downloaded from https://datarepo.eng.ucsd.edu/mcauley_group/data/amazon_v2/categoryFiles/Software.json.gz URL.
+All the links related to Amazon reviews including downloading links are in the "Amazon Review" pdf file in this folder.
