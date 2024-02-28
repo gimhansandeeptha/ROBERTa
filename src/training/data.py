@@ -43,5 +43,3 @@ def split(df):
     # Split the temporary set into testing and validation sets
     x_test, x_val, y_test, y_val = train_test_split(x_temp, y_temp, test_size=0.5, stratify=y_temp, random_state=42)
     return x_train, y_train, x_test, y_test, x_val, y_val
-
-

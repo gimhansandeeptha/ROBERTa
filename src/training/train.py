@@ -2,11 +2,11 @@ import torch
 from tqdm import tqdm
 
 class robertaTrain():
-    def __init__(self, model, learning_rate) -> None:
+    def __init__(self, model, learning_rate, optimizer, loss_function) -> None:
         # Creating the loss function and optimizer
         self.model = model
-        self.loss_function = torch.nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(params =  model.parameters(), lr=learning_rate)
+        self.loss_function = loss_function
+        self.optimizer = optimizer
 
     def calculate_accuracy(self,preds, targets):
         n_correct = (preds==targets).sum().item()
@@ -80,3 +80,4 @@ class robertaTrain():
             # Validation
             val_accuracy = self.validate(validation_loader, device)
         return
+    

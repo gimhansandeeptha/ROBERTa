@@ -4,13 +4,13 @@ from model import RobertaClass
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
+# Replace the models file path in the models directory. 
 model_file_path = "D:\Gimhan Sandeeptha\Gimhan\Sentiment-Email\ROBERTa_production\models\pytorch_roberta_sentiment_3_classes_0.1.3.bin"
 robertaApp = App(model_file_path)
 roberta_model = RobertaClass()
 roberta_model = robertaApp.start_model()
 
 appapi = FastAPI()
-
 
 # CORS configuration
 appapi.add_middleware(

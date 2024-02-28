@@ -3,7 +3,6 @@ from torch.utils.data import DataLoader
 from data import load_data, get_required_data, split
 from transformers import RobertaModel, RobertaTokenizer
 from roberta import RobertaClass
-import processor
 from train import robertaTrain
 
 class RobertaSentimentData():
@@ -85,9 +84,9 @@ class BuildModel():
         self.device = device
         self.model = model 
 
-    def train(self,df, learning_rate, max_len, train_batch_size,validation_batch_size):
+    def train(self,df, learning_rate, max_len, train_batch_size,validation_batch_size, optimizer, loss_function):
         self.model.to(self.device)
         data_handler = DataHandler(df)
         training_loader, testing_loader, validation_loader = data_handler.get_dataloaders(self.tokenizer,max_len, train_batch_size, validation_batch_size)
-        train = robertaTrain(self.model,learning_rate)
+        train = robertaTrain(self.model,learning_rate, optimizer, loss_function)
         train.train(training_loader, validation_loader,self.device)
