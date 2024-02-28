@@ -1,5 +1,8 @@
-# Ignore models folder 
-/models/
+# Ignore all files in the models directory
+models/*
+
+# Except for the model.txt file inside the models directory
+!models/models.txt
 
 # Ignore env folder
 /env/
