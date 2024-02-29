@@ -17,7 +17,7 @@ def load_data():
 
 def get_required_data(df):
     # Define the desired counts for each label
-    counts = {'1.0': 5000, '2.0': 5000, '3.0': 10000, '4.0': 5000, '5.0': 5000}
+    counts = {'1.0': 64, '2.0': 64, '3.0': 128, '4.0': 64, '5.0': 64} # 5000
     new_dfs =[]
 
     # Sample data for each label and store in the list

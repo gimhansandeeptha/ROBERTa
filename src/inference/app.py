@@ -20,4 +20,3 @@ class App():
 
     def predict(self,text):
         return self.inference.inference(text)
-
