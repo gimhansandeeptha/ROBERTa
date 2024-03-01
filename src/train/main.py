@@ -1,6 +1,13 @@
+# Your script in directory A
+import sys
+sys.path.append('../data')  # Adjust the path accordingly
+
+# Now you can import modules from the sibling directory
+from data_module import data
+
 from roberta import RobertaClass
 import processor
-from ..data import data
+from data_module import data
 from model import BuildModel
 import torch
 
