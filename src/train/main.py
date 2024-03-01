@@ -1,8 +1,3 @@
-# Your script in directory A
-import sys
-sys.path.append('../data')  # Adjust the path accordingly
-
-# Now you can import modules from the sibling directory
 from data import data
 
 from roberta import RobertaClass
@@ -26,4 +21,4 @@ model_build = BuildModel(model)
 
 optimizer= torch.nn.CrossEntropyLoss()
 loss_function=torch.optim.Adam(params =  model.parameters(), lr=LEARNING_RATE)
-model_build.train(new_df, LEARNING_RATE,MAX_LEN, TRAIN_BATCH_SIZE, VALID_BATCH_SIZE)
+model_build.train(new_df, LEARNING_RATE,MAX_LEN, TRAIN_BATCH_SIZE, VALID_BATCH_SIZE, optimizer, loss_function)

@@ -3,6 +3,8 @@ from model import Model
 from model import RobertaClass
 
 class App():
+    ''' Model initilization and inferncing is done 
+    '''
     def __init__(self, model_file_path):
         self.model_file_path = model_file_path
         self.model = None 

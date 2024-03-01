@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from data import load_data, get_required_data, split
+from data.data import load_data, get_required_data, split
 from transformers import RobertaModel, RobertaTokenizer
 from roberta import RobertaClass
 from train import robertaTrain
@@ -90,3 +90,18 @@ class BuildModel():
         training_loader, testing_loader, validation_loader = data_handler.get_dataloaders(self.tokenizer,max_len, train_batch_size, validation_batch_size)
         train = robertaTrain(self.model,learning_rate, optimizer, loss_function)
         train.train(training_loader, validation_loader,self.device)
+
+    def save(self, path):
+        torch.save(self.model, path)
+        print('All files saved')
+
+class savedModel:
+    def get_model(self, path):
+        loaded_model= RobertaClass()
+        loaded_model = torch.load(path,map_location=torch.device('cpu'))
+        self.model = loaded_model
+
+        tokenizer = RobertaTokenizer.from_pretrained('roberta-base', truncation=True, do_lower_case=True)    
+        return self.model, tokenizer
+
+    
