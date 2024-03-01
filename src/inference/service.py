@@ -1,13 +1,11 @@
 from fastapi import FastAPI, HTTPException, Request
 from app import App
-from model import RobertaClass
+from roberta import RobertaClass
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
 # Replace the models file path in the models directory. 
-model_file_path = "D:\Gimhan Sandeeptha\Gimhan\Sentiment-Email\ROBERTa_production\models\pytorch_roberta_sentiment_3_classes_0.1.3.bin"
-robertaApp = App(model_file_path)
-roberta_model = RobertaClass()
+robertaApp = App()
 roberta_model = robertaApp.start_model()
 
 appapi = FastAPI()
@@ -43,4 +41,3 @@ async def send_message(message_id: str, request: Request):
 
 if __name__ == "__main__":
     uvicorn.run(appapi, host="127.0.0.1", port=8000)
-

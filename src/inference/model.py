@@ -1,13 +1,14 @@
 import torch
 from transformers import RobertaTokenizer
-from roberta import RobertaClass
+
 
 class Model():
+    ''' Actual implementation to load the model. 
+    '''
     def __init__(self) -> None:
         self.model = None
 
-    def get_model(self,saved_model_path)->RobertaClass:
-        loaded_model= RobertaClass()
+    def get_model(self,saved_model_path):
         loaded_model = torch.load(saved_model_path,map_location=torch.device('cpu'))
         self.model = loaded_model
         return self.model
