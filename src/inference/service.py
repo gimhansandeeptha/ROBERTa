@@ -5,8 +5,8 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
 # Replace the models file path in the models directory. 
-robertaApp = App()
-roberta_model = robertaApp.start_model()
+robertaApp = App(metadata_path = "D:\\Gimhan Sandeeptha\\Gimhan\\Sentiment-Email\\ROBERTa_production\\metadata\\roberta.json")
+robertaApp.start_model()
 
 appapi = FastAPI()
 
@@ -26,6 +26,7 @@ async def send_message(message_id: str, request: Request):
     if not new_message:
         raise HTTPException(status_code=400, detail="Message not provided in request")
 
+    print(new_message)
     prediction = robertaApp.predict([new_message])[0]
 
     if prediction == 0:

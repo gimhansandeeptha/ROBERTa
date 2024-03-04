@@ -12,6 +12,11 @@ class Inference():
         self.model.eval()
 
     def inference(self,texts):  
+        ''' Same preprocessing steps should be done for both trainnig and inferencing phases before inferencing. 
+            Include all the preprocessing steps in training here for inference.
+            input : List of texts 
+            output: List of integers coresponding to each text input. 
+        '''
         results = []
 
         for text in tqdm(texts, desc="Inferencing"):

@@ -1,26 +1,37 @@
 from inference import Inference
 from model import Model
-from roberta import RobertaClass
+import json
 
 class App():
     ''' Model initilization and inferncing. Generic class for all Roberta models.
     '''
-    def __init__(self, model_file_path="D:\Gimhan Sandeeptha\Gimhan\Sentiment-Email\ROBERTa_production\models\pytorch_roberta_sentiment_3_classes_0.1.3.bin"):
-        self.model_file_path = model_file_path
+    def __init__(self, metadata_path):  
+        try:
+            ''' The json file indicating all the required details should present in the metadata_path
+                The incurrect path or format can raise errors.
+            '''
+            with open(metadata_path, 'r') as metadata_file:
+                data = json.load(metadata_file)
+        except FileNotFoundError:
+            print("File not found.")
+        except json.JSONDecodeError:
+            print("Invalid JSON data in the file.") 
+
+        self.model_file_path = data['model']['trained_model_path']
+        self.max_len = data['model']['max_len'] 
+        self.tokenizer_name = data['model']['tokenizer']
+        self.device = 'cpu'                                        ### change 
         self.model = None 
         self.inference = None
-        self.max_len = 256 
-        self.device = 'cpu' 
 
-    def start_model(self)->RobertaClass:
+    def start_model(self):
         '''' Load the saved model 
-            After this is done model is redy for inferencing.
+             After this is done model is redy for inferencing.
         '''
         self.model = Model()
         saved_model = self.model.get_model(self.model_file_path)
-        tokenizer = self.model.get_model_tokenizer()
-        self.inference = Inference(saved_model,tokenizer, self.max_len,self.device)
-        return saved_model
+        tokenizer = self.model.get_model_tokenizer(self.tokenizer_name)
+        self.inference = Inference(saved_model, tokenizer, self.max_len, self.device)
 
-    def predict(self,text):
+    def predict(self, text):
         return self.inference.inference(text)
