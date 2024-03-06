@@ -84,11 +84,11 @@ class BuildModel():
         self.device = device
         self.model = model 
 
-    def train(self,df, learning_rate, max_len, train_batch_size,validation_batch_size, optimizer, loss_function):
+    def train(self,df, max_len, train_batch_size,validation_batch_size, optimizer, loss_function):
         self.model.to(self.device)
         data_handler = DataHandler(df)
         training_loader, testing_loader, validation_loader = data_handler.get_dataloaders(self.tokenizer,max_len, train_batch_size, validation_batch_size)
-        train = robertaTrain(self.model,learning_rate, optimizer, loss_function)
+        train = robertaTrain(self.model, optimizer, loss_function)
         train.train(training_loader, validation_loader,self.device)
 
     def save(self, path):

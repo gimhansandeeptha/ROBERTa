@@ -2,7 +2,7 @@ import torch
 from tqdm import tqdm
 
 class robertaTrain():
-    def __init__(self, model, learning_rate, optimizer, loss_function) -> None:
+    def __init__(self, model, optimizer, loss_function) -> None:
         # Creating the loss function and optimizer
         self.model = model
         self.loss_function = loss_function

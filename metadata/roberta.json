@@ -12,10 +12,9 @@
         "name" : "roberta",
         "tokenizer": "RobertaTokenizer_1",
         "version": "1.0.0",
-        "trained_model_path" : "D:\\Gimhan Sandeeptha\\Gimhan\\Sentiment-Email\\ROBERTA_production_new\\model\\pytorch_roberta_sentiment_3_classes_0.1.3.bin"
+        "trained_model_path" : "C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\models\\pytorch_roberta_sentiment_3_classes_0.1.3.bin"
     },
     "data":{
-        "data_path":"D:\\Gimhan Sandeeptha\\Gimhan\\Sentiment-Email\\ROBERTA_production_new\\data\\processed"
+        "data_path":"C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\data\\Software.json"
     }
-
 }

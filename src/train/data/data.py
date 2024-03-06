@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 import torch
 
 def load_data():
-    json_file_path = "D:\Gimhan Sandeeptha\Gimhan\Sentiment-Email\ROBERTa_production\data\Software.json"
+    json_file_path = "C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\data\\Software.json"
     with open(json_file_path) as f:
         data = [json.loads(line) for line in f]
 
