@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
-from app import App
-from model import RobertaClass
+from src.model.app import App
+from src.model.model import RobertaClass
 
 robertaApp = App()
 roberta_model = RobertaClass()

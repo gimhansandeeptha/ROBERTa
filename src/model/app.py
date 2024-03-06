@@ -1,5 +1,5 @@
-from inference import Inference
-from model import Model
+from ..inference.inference import Inference
+from .model import Model
 import json
 
 class App():

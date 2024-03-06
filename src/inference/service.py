@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
-from app import App
-from roberta import RobertaClass
+from ..model.app import App
+from ..model.roberta import RobertaClass
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
