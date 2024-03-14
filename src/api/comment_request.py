@@ -17,7 +17,7 @@ def get_customer_comments(query_params=None):
     print(json.dumps(response.json(), indent=4))
 
 query_params = {
-        "startDate": "2024-03-11",
-        "endDate": "2024-03-11"
-    }
+    "startDate": "2024-03-11",
+    "endDate": "2024-03-11"
+}
 get_customer_comments(query_params)

@@ -5,86 +5,142 @@ import asyncio
 
 from dotenv import load_dotenv
 import os
-load_dotenv(".env")
+import tracemalloc
+tracemalloc.start()
+
+token_url = "https://wso2sndev.service-now.com/oauth_token.do"
+environment_variable_file_path = ".env"
+
+load_dotenv(environment_variable_file_path)
 
 app = FastAPI()
 
-class TokenRequest(BaseModel):
+class AuthorizationRequest(BaseModel):
     client_id: str
     client_secret: str
     username: str
     password: str
 
-@app.post("/get_data")
-async def get_data(token_request: TokenRequest, background_tasks: BackgroundTasks):
-    # Define your token endpoint URL
-    token_url = "https://wso2sndev.service-now.com/oauth_token.do"
+class TokenRequest(BaseModel):
+    client_id: str
+    client_secret: str
+    access_token: str
+    refresh_token: str
 
-    # Define the grant type
-    grant_type = "password"
 
+@app.post("/authorize")
+async def authorize(authorization_request: AuthorizationRequest, background_tasks: BackgroundTasks):
     # Define any additional parameters needed for token retrieval
+    grant_type = "password"
+    authorization_params = {
+        "grant_type": grant_type,
+        "client_id": authorization_request.client_id,
+        "client_secret": authorization_request.client_secret,
+        "username": authorization_request.username,
+        "password": authorization_request.password
+    }
+
+    # POST request to the token endpoint to get the access token
+    authorization_response = requests.post(token_url, data=authorization_params)
+
+    # Check if the request was successful
+    if authorization_response.status_code == 200:
+        # Extract the access token from the response
+        access_token = authorization_response.json().get("access_token")
+        refresh_token = authorization_response.json().get("refresh_token")
+        
+        if access_token and refresh_token:
+            await update_env_variables({"ACCESS_TOKEN":access_token, "REFRESH_TOKEN":refresh_token}, environment_variable_file_path)
+        else:
+            raise HTTPException(status_code=500, detail="Failed to obtain access token & refersh token")
+    else:
+        raise HTTPException(status_code=authorization_response.status_code, detail=authorization_response.text)
+
+
+@app.post("/reniew_token")
+async def reniew_token(token_request: TokenRequest, background_tasks: BackgroundTasks):
+    grant_type = "refresh_token"
     token_params = {
         "grant_type": grant_type,
         "client_id": token_request.client_id,
         "client_secret": token_request.client_secret,
-        "username": token_request.username,
-        "password": token_request.password
+        "access_token": token_request.access_token,
+        "refresh_token": token_request.refresh_token
     }
-
-    # Make a POST request to the token endpoint to get the access token
     token_response = requests.post(token_url, data=token_params)
-    print(token_response.text)
     # Check if the request was successful
     if token_response.status_code == 200:
         # Extract the access token from the response
         access_token = token_response.json().get("access_token")
-
-        if access_token:
-            # Now you can use the access token to make authorized requests to the API
-            # For example, make a GET request to your API endpoint
-            # Replace "YOUR_API_ENDPOINT" with your actual API endpoint
-            api_endpoint = "https://wso2sndev.service-now.com/api/wso2/customer_health/get_customer_comments?startDate=2024-03-11&endDate=2024-03-11"
-            headers = {
-                "Authorization": f"Bearer {access_token}"
-            }
-            api_response = requests.get(api_endpoint, headers=headers)
-
-            # Return the API response
-            return api_response.json()
+        refresh_token = token_response.json().get("refresh_token")
+        
+        if access_token and refresh_token:
+            await update_env_variables({"ACCESS_TOKEN":access_token, "REFRESH_TOKEN":refresh_token}, environment_variable_file_path)
         else:
-            raise HTTPException(status_code=500, detail="Failed to obtain access token")
+            raise HTTPException(status_code=500, detail="Failed to obtain access token & refersh token")
     else:
         raise HTTPException(status_code=token_response.status_code, detail=token_response.text)
+    
+        
+async def service_now_authorize():
+    # Get the client credentials
+    client_id = os.getenv("CLIENT_ID")  
+    client_secret = os.getenv("CLIENT_SECRET")
 
-# Run the get_data function once and wait for one minute before shutting down
-async def run_get_data_once():
-    # Define your client credentials
-    client_id = os.getenv("CLIENT_ID")  # Replace with your client ID generated in ServiceNow
-    client_secret = os.getenv("CLIENT_SECRET")  # Replace with your client secret generated in ServiceNow
-
-    # Define your username and password
-    username = os.getenv("SERVICENOW_USERNAME")  # Replace with your ServiceNow username
+    # Get username and password
+    username = os.getenv("SERVICENOW_USERNAME")
     password = os.getenv("SERVICENOW_PASSWORD")  # Replace with your ServiceNow password
 
-    # Define the grant type
-    grant_type = "password"
-
-    # Define any additional parameters needed for token retrieval
-    token_params = {
-        "grant_type": grant_type,
+    # Additional parameters needed for token retrieval
+    authorization_params = {
         "client_id": client_id,
         "client_secret": client_secret,
         "username": username,
         "password": password
     }
 
-    await get_data(TokenRequest(**token_params), BackgroundTasks())
-    # Wait for one minute
+    await authorize(AuthorizationRequest(**authorization_params), BackgroundTasks())
     await asyncio.sleep(60)
+
+async def service_now_refresh_token():
+    # Get the client credentials
+    client_id = os.getenv("CLIENT_ID")  
+    client_secret = os.getenv("CLIENT_SECRET")
+
+    # Get access and referesh tokens (Assuming that access and refresh tokens have obtained earlier and they are avilable in environmental variables)
+    access_token = os.getenv("ACCESS_TOKEN")
+    referesh_token = os.getenv("REFRESH_TOKEN") 
+
+    # Additional parameters needed for token retrieval
+    token_params = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "access_token": access_token,
+        "refresh_token": referesh_token
+    }
+
+    await reniew_token(TokenRequest(**token_params), BackgroundTasks())
+    await asyncio.sleep(60)
+
+async def update_env_variables(env_variable_dict:dict, env_file_path:str):
+    with open(env_file_path, 'r') as file:
+        lines = file.readlines()
+    
+    with open(env_file_path, 'w') as file:
+        for line in lines:
+            key_val = line.strip().split('=')
+            key = key_val[0]
+            if key in env_variable_dict:
+                file.write(f'{key}="{env_variable_dict[key]}"\n')
+                del env_variable_dict[key]
+            else:
+                file.write(line)
+        
+        for key, val in env_variable_dict.items():
+            file.write(f'{key}="{val}"')
+
 
 # Start the server
 @app.on_event("startup")
 async def startup_event():
-    asyncio.create_task(run_get_data_once())
-
+    asyncio.create_task(service_now_refresh_token())
