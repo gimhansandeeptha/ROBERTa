@@ -1,23 +1,42 @@
 import requests
+from fastapi import HTTPException
 import json
+import os 
+from dotenv import load_dotenv
+from servicenow_access import service_now_refresh_token
 
-def get_new_token():
-    pass
+base_url = "https://wso2sndev.service-now.com/api/wso2/customer_health/get_customer_comments"
+environment_variable_file_path = ".env"
+load_dotenv(environment_variable_file_path)
 
-def get_customer_comments(query_params=None):
-    base_url = "https://wso2sndev.service-now.com/api/wso2/customer_health/get_customer_comments"
+def request_customer_comments(query_params=None):
+    # Retrieve access token and token type from environment variables
+    access_token = os.getenv("ACCESS_TOKEN")
+    token_type = os.getenv("TOKEN_TYPE")
+
     payload = {}
     headers = {
-  'Authorization': '', # token
-  'Cookie': 'BIGipServerpool_wso2sndev=a54e6a419eb6227f51cefa66eeb46a63; JSESSIONID=C6A8A9CE55FC366667886C11829BCE56; glide_session_store=368A542F1B78C250264C997A234BCBC7; glide_user_activity=U0N2M18xOmxaVFd0TldxZll1S2wzWGllWHdGVFVDS1NDcXF3Y09nUkJ6aE9Lb0p5bkk9OlltaktKbm5GM2dVNm9McnB6VFpmcG1VbDlVUzhzY3pIcm5lQzFsMUt1Q1U9; glide_user_route=glide.7aba0aa922f21deed5cfb2b44291036d'
+        'Authorization': f"{token_type} {access_token}",
     }
-
+    #pagination 
     response = requests.get(base_url, headers=headers, data=payload, params=query_params)
-    # print(response.text)
-    print(json.dumps(response.json(), indent=4))
+    return response
+
+def get_customer_comments(query_params:dict=None)->json:
+    response = request_customer_comments(query_params)
+    if response.status_code==200:
+        pass
+    elif response.status_code==401:
+        service_now_refresh_token()
+        response=request_customer_comments(query_params)
+    else:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+    return response
 
 query_params = {
-    "startDate": "2024-03-11",
-    "endDate": "2024-03-11"
-}
-get_customer_comments(query_params)
+        "startDate": "2024-03-11",
+        "endDate": "2024-03-11"
+    }
+
+# comment = get_customer_comments(query_params)
+# print(comment.json())

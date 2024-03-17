@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 import requests
-import asyncio
-
+import logging
 from dotenv import load_dotenv
 import os
 import tracemalloc
@@ -13,7 +12,7 @@ environment_variable_file_path = ".env"
 
 load_dotenv(environment_variable_file_path)
 
-app = FastAPI()
+# app = FastAPI()
 
 class AuthorizationRequest(BaseModel):
     client_id: str
@@ -28,8 +27,8 @@ class TokenRequest(BaseModel):
     refresh_token: str
 
 
-@app.post("/authorize")
-async def authorize(authorization_request: AuthorizationRequest, background_tasks: BackgroundTasks):
+# @app.post("/authorize")
+def authorize(authorization_request: AuthorizationRequest, background_tasks: BackgroundTasks):
     # Define any additional parameters needed for token retrieval
     grant_type = "password"
     authorization_params = {
@@ -42,23 +41,27 @@ async def authorize(authorization_request: AuthorizationRequest, background_task
 
     # POST request to the token endpoint to get the access token
     authorization_response = requests.post(token_url, data=authorization_params)
-
     # Check if the request was successful
     if authorization_response.status_code == 200:
         # Extract the access token from the response
         access_token = authorization_response.json().get("access_token")
         refresh_token = authorization_response.json().get("refresh_token")
+        token_type = authorization_response.json().get("token_type")
+        expires_in = authorization_response.json().get("expires_in")
         
         if access_token and refresh_token:
-            await update_env_variables({"ACCESS_TOKEN":access_token, "REFRESH_TOKEN":refresh_token}, environment_variable_file_path)
+            update_env_variables(
+                {"ACCESS_TOKEN":access_token, "REFRESH_TOKEN":refresh_token, "TOKEN_TYPE":token_type, "EXPIRES_IN":expires_in }, 
+                environment_variable_file_path
+            )
         else:
             raise HTTPException(status_code=500, detail="Failed to obtain access token & refersh token")
     else:
         raise HTTPException(status_code=authorization_response.status_code, detail=authorization_response.text)
 
 
-@app.post("/reniew_token")
-async def reniew_token(token_request: TokenRequest, background_tasks: BackgroundTasks):
+# @app.post("/reniew_token")
+def reniew_token(token_request: TokenRequest, background_tasks: BackgroundTasks):
     grant_type = "refresh_token"
     token_params = {
         "grant_type": grant_type,
@@ -68,28 +71,38 @@ async def reniew_token(token_request: TokenRequest, background_tasks: Background
         "refresh_token": token_request.refresh_token
     }
     token_response = requests.post(token_url, data=token_params)
+    print(f"token_response:{token_response}")
     # Check if the request was successful
-    if token_response.status_code == 200:
-        # Extract the access token from the response
-        access_token = token_response.json().get("access_token")
-        refresh_token = token_response.json().get("refresh_token")
-        
-        if access_token and refresh_token:
-            await update_env_variables({"ACCESS_TOKEN":access_token, "REFRESH_TOKEN":refresh_token}, environment_variable_file_path)
+    try:
+        if token_response.status_code == 200:
+            # Extract the access token from the response
+            access_token = token_response.json().get("access_token")
+            refresh_token = token_response.json().get("refresh_token")
+            token_type = token_response.json().get("token_type")
+            expires_in = token_response.json().get("expires_in")
+
+            if access_token and refresh_token:
+                update_env_variables(
+                    {"ACCESS_TOKEN":access_token, "REFRESH_TOKEN":refresh_token, "TOKEN_TYPE":token_type, "EXPIRES_IN":expires_in}, 
+                    environment_variable_file_path)
+            else:
+                raise HTTPException(status_code=500, detail="Failed to obtain access token & refersh token")
         else:
-            raise HTTPException(status_code=500, detail="Failed to obtain access token & refersh token")
-    else:
-        raise HTTPException(status_code=token_response.status_code, detail=token_response.text)
+            raise HTTPException(status_code=token_response.status_code, detail=token_response.text)
+    except HTTPException as e:
+        pass
+
+    return token_response.status_code
     
         
-async def service_now_authorize():
+def service_now_authorize():
     # Get the client credentials
     client_id = os.getenv("CLIENT_ID")  
     client_secret = os.getenv("CLIENT_SECRET")
 
     # Get username and password
     username = os.getenv("SERVICENOW_USERNAME")
-    password = os.getenv("SERVICENOW_PASSWORD")  # Replace with your ServiceNow password
+    password = os.getenv("SERVICENOW_PASSWORD") 
 
     # Additional parameters needed for token retrieval
     authorization_params = {
@@ -99,12 +112,12 @@ async def service_now_authorize():
         "password": password
     }
 
-    await authorize(AuthorizationRequest(**authorization_params), BackgroundTasks())
-    await asyncio.sleep(60)
+    authorize(AuthorizationRequest(**authorization_params), BackgroundTasks())
 
-async def service_now_refresh_token():
+
+def service_now_refresh_token():
     # Get the client credentials
-    client_id = os.getenv("CLIENT_ID")  
+    client_id = os.getenv("CLIENT_ID") 
     client_secret = os.getenv("CLIENT_SECRET")
 
     # Get access and referesh tokens (Assuming that access and refresh tokens have obtained earlier and they are avilable in environmental variables)
@@ -119,10 +132,13 @@ async def service_now_refresh_token():
         "refresh_token": referesh_token
     }
 
-    await reniew_token(TokenRequest(**token_params), BackgroundTasks())
-    await asyncio.sleep(60)
+    status=reniew_token(TokenRequest(**token_params), BackgroundTasks())
+    if status ==401:
+        service_now_authorize()
 
-async def update_env_variables(env_variable_dict:dict, env_file_path:str):
+
+
+def update_env_variables(env_variable_dict:dict, env_file_path:str):
     with open(env_file_path, 'r') as file:
         lines = file.readlines()
     
@@ -140,7 +156,4 @@ async def update_env_variables(env_variable_dict:dict, env_file_path:str):
             file.write(f'{key}="{val}"')
 
 
-# Start the server
-@app.on_event("startup")
-async def startup_event():
-    asyncio.create_task(service_now_refresh_token())
+# service_now_refresh_token()

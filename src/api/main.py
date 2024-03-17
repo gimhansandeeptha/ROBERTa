@@ -7,7 +7,7 @@ app = FastAPI()
 
 @app.get("/get_data")
 async def get_data_from_external_api():
-    external_api_url = "https://example.com/api/data"  # Replace with the actual URL of the external API
+    external_api_url = "https://example.com/api/data" 
 
     async with httpx.AsyncClient() as client:
         response = await client.get(external_api_url)
