@@ -8,7 +8,7 @@ import tracemalloc
 tracemalloc.start()
 
 token_url = "https://wso2sndev.service-now.com/oauth_token.do"
-environment_variable_file_path = ".env"
+environment_variable_file_path = "C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\src\\api\\.env"
 
 load_dotenv(environment_variable_file_path)
 
@@ -135,7 +135,6 @@ def service_now_refresh_token():
     status=reniew_token(TokenRequest(**token_params), BackgroundTasks())
     if status ==401:
         service_now_authorize()
-
 
 
 def update_env_variables(env_variable_dict:dict, env_file_path:str):

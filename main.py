@@ -1,7 +1,11 @@
-from dotenv import load_dotenv
-import os
+from fastapi import FastAPI
+from apscheduler.schedulers.background import BackgroundScheduler
+from contextlib import asynccontextmanager
+import uvicorn
+from src.api.main import lifespan
 
-load_dotenv(".env")
+app=FastAPI(lifespan=lifespan)
 
-user_name = os.getenv("SERVICENOW_USERNAME")
-print(user_name)
+if __name__ =="__main__":
+    uvicorn.run("main:app")
+

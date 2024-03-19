@@ -1,7 +1,7 @@
-from comment_request import get_customer_comments
+from .comment_request import get_customer_comments
 
-def get_messages(response):
-    '''Return two dimentional array, fist dimention is the account name and the second dimention is liat of comments
+def extract_messages(response):
+    ''' Return two dimentional array, fist dimention is the account name and the second dimention is liat of comments
         Both the dimentions can be empty.
     '''
     case_comments=[]
@@ -11,6 +11,7 @@ def get_messages(response):
     except ValueError:
         raise ValueError("The object cannot be parsed")
     
+    print(data)
     cases = data['result']['cases']
     for case in cases:
         values=[]
@@ -25,10 +26,9 @@ def get_messages(response):
         case_comments.append([account_name,values])
     return case_comments
 
-query_params = {
-        "startDate": "2024-03-11",
-        "endDate": "2024-03-11"
-    }
+# query_params = {
+#         "startDate": "2024-03-11",
+#         "endDate": "2024-03-11"
+#     }
 
-print(get_messages(get_customer_comments(query_params)))
-
+# print(extract_messages(get_customer_comments(query_params)))
