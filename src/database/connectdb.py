@@ -43,10 +43,30 @@ class DatabaseConnection:
         self.cursor = self.connection.cursor()
         self.cursor.execute(query)
 
-        for row in self.cursor:
-            result.append(row)
+        # Check if the query is INSERT, UPDATE, or DELETE
+        if query.strip().lower().startswith(('insert', 'update', 'delete')):
+            # Commit changes for INSERT, UPDATE, or DELETE queries
+            self.connection.commit()
+            result = self.cursor.rowcount  # number of affected rows
+        else:
+            for row in self.cursor:
+                result.append(row)
 
         return result
 
     def count(self, table, condition = None):
         return len(self.simple_query(table, '*', condition))
+
+
+# query1 = "INSERT INTO account (case_id, account_name) VALUES ('CS0426786','ParaTestAccount6')"
+# db=DatabaseConnection(hostname='localhost',
+#                               database='sentiment',
+#                               username='',
+#                               password=''
+#                               )
+# db.connect()
+# result = db.query(query1)
+# db.disconnect()
+# print(result)
+    
+    

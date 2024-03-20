@@ -11,19 +11,20 @@ def extract_messages(response):
     except ValueError:
         raise ValueError("The object cannot be parsed")
     
-    print(data)
+    # print(data)
     cases = data['result']['cases']
     for case in cases:
         values=[]
         account_name = case.get('account', None)
-        if account_name==None:
+        case_id = case.get('number', None)
+        if account_name==None or case_id==None:
             continue
         for comment in case.get('entries', []):
             value = comment.get('value', None)
             if value:
                 values.append(value)
         
-        case_comments.append([account_name,values])
+        case_comments.append([case_id,account_name,values])
     return case_comments
 
 # query_params = {

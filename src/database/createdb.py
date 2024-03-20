@@ -22,7 +22,7 @@ class CreateDB():
         """
         comment_table = """
             CREATE TABLE IF NOT EXISTS comment (
-                sys_id VARCHAR(50) PRIMARY KEY,
+                id INT  AUTO_INCREMENT PRIMARY KEY,
                 comment VARCHAR(1024),
                 sentiment VARCHAR(16),
                 account_case_id VARCHAR(16),

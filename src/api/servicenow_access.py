@@ -154,5 +154,4 @@ def update_env_variables(env_variable_dict:dict, env_file_path:str):
         for key, val in env_variable_dict.items():
             file.write(f'{key}="{val}"')
 
-
 # service_now_refresh_token()
