@@ -8,7 +8,7 @@ import tracemalloc
 tracemalloc.start()
 
 token_url = "https://wso2sndev.service-now.com/oauth_token.do"
-environment_variable_file_path = "C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\src\\api\\.env"
+environment_variable_file_path = "src\\servicenow\\.env"
 
 load_dotenv(environment_variable_file_path)
 

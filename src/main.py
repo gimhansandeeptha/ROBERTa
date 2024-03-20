@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 from contextlib import asynccontextmanager
 import uvicorn
-from .api.main import API
+from .servicenow.main import API
 
 # Changing the order of following two imports leads to an error (dependency conflict) #check
 from .model.roberta import RobertaClass
@@ -19,7 +19,7 @@ robertaApp.start_model()
 async def lifespan(lifespan):
     print('app started...')
     schedular = BackgroundScheduler()
-    schedular.add_job(func=process, trigger='cron', hour=14, minute=32, second=0)
+    schedular.add_job(func=process, trigger='cron', hour=14, minute=52, second=0)
     schedular.start()
     yield
     print("app stopped...")
