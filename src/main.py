@@ -12,14 +12,14 @@ from .model.app import App
 from .database.main import Database
 
 # Replace the models file path in the models directory. 
-robertaApp = App(metadata_path = "C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\metadata\\roberta.json")
+robertaApp = App(metadata_path = "metadata\\roberta.json") # C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\metadata\\roberta.json
 robertaApp.start_model()
 
 @asynccontextmanager
 async def lifespan(lifespan):
     print('app started...')
     schedular = BackgroundScheduler()
-    schedular.add_job(func=process, trigger='cron', hour=14, minute=6, second=0)
+    schedular.add_job(func=process, trigger='cron', hour=14, minute=32, second=0)
     schedular.start()
     yield
     print("app stopped...")
