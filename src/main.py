@@ -19,7 +19,7 @@ robertaApp.start_model()
 async def lifespan(lifespan):
     print('app started...')
     schedular = BackgroundScheduler()
-    schedular.add_job(func=process, trigger='cron', hour=14, minute=52, second=0)
+    schedular.add_job(func=process, trigger='cron', hour=10, minute=35, second=0)
     schedular.start()
     yield
     print("app stopped...")
@@ -28,16 +28,14 @@ async def lifespan(lifespan):
 def process():
     api = API()
     comments = api.get_comments()
+    # print("comments", comments)
     comments_with_sentiment = get_sentiments(comments)
-
+    # print(comments_with_sentiment)
     database = Database()
     database.insert(comments_with_sentiment)
-    # print(comments_with_sentiment)
 
 app=FastAPI(lifespan=lifespan)
 if __name__ =="__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
 
-# response_list =[["Acc01",["Hi how are you?", "it is not a fair deal. i am dissapointed"]],["Acc2",["It is great keep it up", "Hi this is a normal day","can i have your pen for a moment"]]]
-# print(get_sentiments(response_list))
     

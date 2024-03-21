@@ -17,6 +17,7 @@ class CreateDB():
         account_table = """
             CREATE TABLE IF NOT EXISTS account (
                 case_id VARCHAR(16) PRIMARY KEY,
+                sys_created_on DATETIME,
                 account_name VARCHAR(50) NOT NULL
             )
         """

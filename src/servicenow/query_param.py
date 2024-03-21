@@ -7,9 +7,10 @@ def get_query_param(start=0, page_size=5)->dict:
     utc_date = utc_time.date()
     yesterday = utc_date - timedelta(days=1)
 
+    # Put 'yesterday' varibale for actual production. 
     query_params = {
-        "startDate": yesterday,
-        "endDate": yesterday,
+        "startDate": "2024-03-19", # yesterday 
+        "endDate": "2024-03-19", # yesterday
         "page_size": page_size,
         "start" : start
     }
