@@ -72,8 +72,30 @@ class Database():
         finally:
             db.disconnect()
 
-    def get_sentiments_2():
-        pass
+    def get_cases_by_date(self, start_date, end_date):
+        result = ''
+        query_by_date = f"""
+                            SELECT 
+                                a.account_name, 
+                                a.case_id, 
+                                a.sys_created_on, 
+                                c.comment, 
+                                c.sentiment
+                            FROM account a
+                            JOIN comment c ON a.case_id = c.account_case_id
+                            WHERE Date(sys_created_on) BETWEEN '{start_date}' AND '{end_date}';
+                        """
+        db=DatabaseConnection(hostname=hostname,
+                              database=database,
+                              username=username,
+                              password=password
+                              )
+        db.connect()
+        try:
+            result = db.query(query_by_date)
+        finally:
+            db.disconnect()
+        return result
 
 
 # # Unit Testing
@@ -86,3 +108,8 @@ class Database():
 # # Unit testing : Delete
 # db = Database()
 # db.delete_all()
+    
+# # Unit testing: get_cases_by_date
+# db = Database()
+# result = db.get_cases_by_date("2024-03-19","2024-03-19")
+# print(result)

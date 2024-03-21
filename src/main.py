@@ -28,9 +28,7 @@ async def lifespan(lifespan):
 def process():
     api = API()
     comments = api.get_comments()
-    # print("comments", comments)
     comments_with_sentiment = get_sentiments(comments)
-    # print(comments_with_sentiment)
     database = Database()
     database.insert(comments_with_sentiment)
 
