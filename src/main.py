@@ -11,6 +11,8 @@ from .inference.main import get_sentiments
 from .model.app import App
 from .database.main import Database
 
+from .api.main import router
+
 # Replace the models file path in the models directory. 
 robertaApp = App(metadata_path = "metadata\\roberta.json") # C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\metadata\\roberta.json
 robertaApp.start_model()
@@ -33,7 +35,6 @@ def process():
     database.insert(comments_with_sentiment)
 
 app=FastAPI(lifespan=lifespan)
+app.include_router(router)
 if __name__ =="__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
-
-    
