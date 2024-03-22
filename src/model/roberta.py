@@ -9,12 +9,12 @@ class RobertaClass(torch.nn.Module):
     - dropout: Dropout layer for regularization.
     - classifier: Linear layer for final sentiment classification.
     '''
-    def __init__(self):
+    def __init__(self, hidden_size = 768, dropout_prob=0.3, num_classes=3):
         super(RobertaClass, self).__init__()
         self.l1 = RobertaModel.from_pretrained("roberta-base")
-        self.pre_classifier = torch.nn.Linear(768, 100)
-        self.dropout = torch.nn.Dropout(0.3)
-        self.classifier = torch.nn.Linear(100, 3)
+        self.pre_classifier = torch.nn.Linear(hidden_size, 100)
+        self.dropout = torch.nn.Dropout(dropout_prob)
+        self.classifier = torch.nn.Linear(100, num_classes)
 
     def forward(self, input_ids, attention_mask, token_type_ids):
         output_1 = self.l1(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)

@@ -1,9 +1,9 @@
 import torch
 from torch.utils.data import DataLoader
-from data.data import load_data, get_required_data, split
+from .data.data import load_data, get_required_data, split
 from transformers import RobertaModel, RobertaTokenizer
-from roberta import RobertaClass
-from train import robertaTrain
+from ..model.roberta import RobertaClass
+from .train import robertaTrain
 
 class RobertaSentimentData():
     '''

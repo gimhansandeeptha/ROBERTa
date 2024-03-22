@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 import torch
 
 def load_data():
-    json_file_path = "C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\data\\Software.json"
+    json_file_path = "data\\Software.json"
     with open(json_file_path) as f:
         data = [json.loads(line) for line in f]
 
@@ -34,6 +34,7 @@ def get_required_data(df):
 
     new_df['overall'] = new_df['overall'].replace(label_mapping)
     shuffled_df = new_df.sample(frac=1, random_state=42).reset_index(drop=True)
+    print(shuffled_df.head())
     return shuffled_df
 
 def split(df):

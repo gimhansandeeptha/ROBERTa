@@ -1,12 +1,11 @@
-from data import data
+from .data import data
 
-from roberta import RobertaClass
-import processor
-from data import data
-from model import BuildModel
+from ..model.roberta import RobertaClass
+from .processor import get_device
+from .model import BuildModel
 import torch
 
-device = processor.get_device()
+device = get_device()
 model = RobertaClass(hidden_size=768,dropout_prob=0.3, num_classes=3)
 
 LEARNING_RATE = 1e-05
