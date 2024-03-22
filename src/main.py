@@ -14,14 +14,14 @@ from .database.main import Database
 from .api.main import router
 
 # Replace the models file path in the models directory. 
-robertaApp = App(metadata_path = "metadata\\roberta.json") # C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\metadata\\roberta.json
+robertaApp = App(metadata_path = "metadata\\roberta.json")
 robertaApp.start_model()
 
 @asynccontextmanager
 async def lifespan(lifespan):
     print('app started...')
     schedular = BackgroundScheduler()
-    schedular.add_job(func=process, trigger='cron', hour=10, minute=35, second=0)
+    schedular.add_job(func=process, trigger='cron', hour=9, minute=42, second=0)
     schedular.start()
     yield
     print("app stopped...")

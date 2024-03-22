@@ -1,5 +1,6 @@
 from ..model.app import App
 from ..model.roberta import RobertaClass
+from .preprocess import html_to_text, normalize_texts
 # Replace the models file path in the models directory. 
 robertaApp = App(metadata_path = "metadata\\roberta.json") # C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\metadata\\roberta.json
 robertaApp.start_model()
@@ -19,7 +20,9 @@ def get_sentiments(cases):
     for case in cases:
         for entry in case.get('entries'):
             comment = entry.get('value')
+            comment = normalize_texts(html_to_text(comment))
             sentiment = get_one_sentiment(comment)
+            entry['value'] = comment
             entry['sentiment'] = sentiment
     return cases
 
