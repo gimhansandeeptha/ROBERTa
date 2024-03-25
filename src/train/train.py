@@ -78,8 +78,8 @@ class robertaTrain():
             print(f'Training Accuracy: {(n_correct * 100) / nb_tr_examples}%')
 
             # Validation
-            val_accuracy = self.validate(validation_loader, device)
+            if validation_loader is not None:
+                val_accuracy = self.validate(validation_loader, device)
         return
     
-    
-    
+   

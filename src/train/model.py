@@ -36,7 +36,6 @@ class RobertaSentimentData():
         mask = inputs['attention_mask']
         token_type_ids = inputs["token_type_ids"]
 
-
         return {
             'ids': torch.tensor(ids, dtype=torch.long),
             'mask': torch.tensor(mask, dtype=torch.long),
@@ -92,7 +91,7 @@ class BuildModel():
         train.train(training_loader, validation_loader,self.device)
 
     def save(self, path):
-        torch.save(self.model, path)
+        torch.save(self.model.state_dict(), path)
         print('All files saved')
 
 class savedModel:
@@ -104,4 +103,3 @@ class savedModel:
         tokenizer = RobertaTokenizer.from_pretrained('roberta-base', truncation=True, do_lower_case=True)    
         return self.model, tokenizer
 
-    
