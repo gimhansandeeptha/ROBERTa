@@ -21,7 +21,7 @@ robertaApp.start_model()
 async def lifespan(lifespan):
     print('app started...')
     schedular = BackgroundScheduler()
-    schedular.add_job(func=process, trigger='cron', hour=9, minute=42, second=0)
+    schedular.add_job(func=process, trigger='cron', hour=11, minute=26, second=0)
     schedular.start()
     yield
     print("app stopped...")
