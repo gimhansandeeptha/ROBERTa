@@ -37,3 +37,4 @@ class RobertaSentimentData():
             'token_type_ids': torch.tensor(token_type_ids, dtype=torch.long),
             'targets': torch.tensor(self.targets[index], dtype=torch.float)
         }
+    

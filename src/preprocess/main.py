@@ -1,4 +1,4 @@
-from roberta_Sentiment_data import RobertaSentimentData
+from .roberta_Sentiment_data import RobertaSentimentData
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 import json
