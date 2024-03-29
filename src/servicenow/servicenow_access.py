@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 import requests
 import logging
-from dotenv import load_dotenv
+from dotenv import dotenv_values # load_dotenv
 import os
 import tracemalloc
 tracemalloc.start()
@@ -10,7 +10,7 @@ tracemalloc.start()
 token_url = "https://wso2sndev.service-now.com/oauth_token.do"
 environment_variable_file_path = "src\\servicenow\\.env"
 
-load_dotenv(environment_variable_file_path)
+# load_dotenv(environment_variable_file_path)
 
 # app = FastAPI()
 
@@ -96,13 +96,14 @@ def reniew_token(token_request: TokenRequest, background_tasks: BackgroundTasks)
     
         
 def service_now_authorize():
+    config = dotenv_values(environment_variable_file_path)
     # Get the client credentials
-    client_id = os.getenv("CLIENT_ID")  
-    client_secret = os.getenv("CLIENT_SECRET")
+    client_id =config.get("CLIENT_ID", None) # os.getenv("CLIENT_ID")  
+    client_secret = config.get("CLIENT_SECRET", None) # os.getenv("CLIENT_SECRET")
 
     # Get username and password
-    username = os.getenv("SERVICENOW_USERNAME")
-    password = os.getenv("SERVICENOW_PASSWORD") 
+    username = config.get("SERVICENOW_USERNAME", None)#os.getenv("SERVICENOW_USERNAME")
+    password = config.get("SERVICENOW_PASSWORD", None)# os.getenv("SERVICENOW_PASSWORD") 
 
     # Additional parameters needed for token retrieval
     authorization_params = {
@@ -116,13 +117,14 @@ def service_now_authorize():
 
 
 def service_now_refresh_token():
+    config = dotenv_values(environment_variable_file_path)
     # Get the client credentials
-    client_id = os.getenv("CLIENT_ID") 
-    client_secret = os.getenv("CLIENT_SECRET")
+    client_id =config["CLIENT_ID"] # os.getenv("CLIENT_ID")  
+    client_secret = config["CLIENT_SECRET"] # os.getenv("CLIENT_SECRET")
 
     # Get access and referesh tokens (Assuming that access and refresh tokens have obtained earlier and they are avilable in environmental variables)
-    access_token = os.getenv("ACCESS_TOKEN")
-    referesh_token = os.getenv("REFRESH_TOKEN") 
+    access_token =config.get("ACCESS_TOKEN", None) #os.getenv("ACCESS_TOKEN")
+    referesh_token = config("REFRESH_TOKEN", None) #os.getenv("REFRESH_TOKEN") 
 
     # Additional parameters needed for token retrieval
     token_params = {

@@ -2,17 +2,17 @@ import requests
 from fastapi import HTTPException
 import json
 import os 
-from dotenv import load_dotenv
+from dotenv import  dotenv_values  , load_dotenv
 from .servicenow_access import service_now_refresh_token
 
 base_url = "https://wso2sndev.service-now.com/api/wso2/customer_health/get_customer_comments"
-environment_variable_file_path = ".env"
-load_dotenv(environment_variable_file_path)
+environment_variable_file_path = "src/servicenow/.env"
 
 def request_customer_comments(query_params=None):
+    config = dotenv_values(environment_variable_file_path)
     # Retrieve access token and token type from environment variables
-    access_token = os.getenv("ACCESS_TOKEN")
-    token_type = os.getenv("TOKEN_TYPE")
+    access_token = config.get("ACCESS_TOKEN",None)
+    token_type = config.get("TOKEN_TYPE") # os.getenv("TOKEN_TYPE")
 
     payload = {}
     headers = {

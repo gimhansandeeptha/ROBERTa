@@ -65,18 +65,19 @@ def get_required_data(df):
     print(shuffled_df.head())
     return shuffled_df
 
-df = get_required_data(load_data())
-data_handler = DataHandler(df,{"train_size":0.7, "test_size":0, "validation_size": 0.3})
-tokenizer = RobertaTokenizer.from_pretrained("roberta-base", truncation=True, do_lower_case=True)
-train, test, val = data_handler.get_dataloaders(tokenizer,256,32,16)
-print(train, test, val)
+def run_finetune():
+    df = get_required_data(load_data())
+    data_handler = DataHandler(df,{"train_size":0.7, "test_size":0, "validation_size": 0.3})
+    tokenizer = RobertaTokenizer.from_pretrained("roberta-base", truncation=True, do_lower_case=True)
+    train, test, val = data_handler.get_dataloaders(tokenizer,256,32,16)
+    print(train, test, val)
 
-LEARNING_RATE = 1e-05
-MAX_LEN = 256
-TRAIN_BATCH_SIZE = 32
-VALID_BATCH_SIZE = 16
-model = RobertaClass(hidden_size=768,dropout_prob=0.3, num_classes=3)
-loss_function = torch.nn.CrossEntropyLoss()
-optimizer =torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
-finetune = RobertaFinetune(model=model,optimizer=optimizer,loss_function=loss_function)
-finetune.finetune(training_loader=train,validation_loader=val)
+    LEARNING_RATE = 1e-05
+    MAX_LEN = 256
+    TRAIN_BATCH_SIZE = 32
+    VALID_BATCH_SIZE = 16
+    model = RobertaClass(hidden_size=768,dropout_prob=0.3, num_classes=3)
+    loss_function = torch.nn.CrossEntropyLoss()
+    optimizer =torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+    finetune = RobertaFinetune(model=model,optimizer=optimizer,loss_function=loss_function)
+    finetune.finetune(training_loader=train,validation_loader=val)

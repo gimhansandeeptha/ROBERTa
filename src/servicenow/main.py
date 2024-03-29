@@ -27,4 +27,3 @@ class API():
         # await shared_resource.set_data(processed_messages)
         # print(processed_messages)
         return processed_messages
-
