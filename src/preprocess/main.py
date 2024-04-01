@@ -13,9 +13,9 @@ class DataHandler():
             raise ValueError("DataFrame is missing 'text' column or 'sentiment' column ")
         self.df = df
 
-        self.train_size = 0.7
-        self.test_size = 0.15
-        self.validation_size = 0.15
+        self.train_size = 0
+        self.test_size = 0
+        self.validation_size = 0
 
         if split_dict is not None:
             self.train_size = split_dict.get("train_size",0)
@@ -26,8 +26,18 @@ class DataHandler():
         if split_sum != 1:
             raise ValueError(f"Split sizes should sum up to 1 but sum is {split_sum}")
 
-    def split(self, df):
-        X,y = df['text'].values,df['sentiment'].values
+    def split_df(self):
+        X,y = self.df['text'].values,self.df['sentiment'].values
+
+        if self.train_size==0:
+            x_train = x_val = None
+
+        if self.test_size==0:
+            x_test = y_test = None
+
+        if self.validation_size==0:
+            x_val = y_val = None
+
         x_train, x_temp, y_train, y_temp = train_test_split(X, y, train_size=self.train_size, stratify=y, random_state=42)
 
         # Split the temporary set into testing and validation sets
@@ -45,7 +55,7 @@ class DataHandler():
         return x_train, y_train, x_test, y_test, x_val, y_val
     
     def get_dataloaders(self, tokenizer, max_len, train_batch_size=None, validation_batch_size=None):
-        x_train, y_train, x_test, y_test, x_val, y_val = self.split(self.df)
+        x_train, y_train, x_test, y_test, x_val, y_val = self.split_df()
         training_loader = testing_loader = validation_loader = None
 
         if x_train is not None:

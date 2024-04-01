@@ -62,10 +62,20 @@ class RobertaFinetune():
         else:
             self.no_improvement_count += 1
 
-        return
+        return val_loss
+    
+    def save_checkpoint(self, filepath):
+        checkpoint = {
+            # After finetuning self.model is either bestmodel with validation is not None, if not validate it is the model tuned for a indicated number of epochs. 
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+        }
+        torch.save(checkpoint, filepath)
+        # print(f"Checkpoint saved at {filepath}")
+
 
     # Training loop
-    def finetune(self, training_loader, validation_loader=None, device='cpu', epochs=5):
+    def finetune(self, training_loader, validation_loader=None, device='cpu', epochs=3):
         for epoch in range(epochs):
             tr_loss = 0
             n_correct = 0
@@ -101,7 +111,7 @@ class RobertaFinetune():
                         "Training Accuracy": f"{(n_correct * 100) / nb_tr_examples}%"
                         }
             self.log.enter_log(log_dict)
-            
+
             # Validation
             if validation_loader is not None:
                 self.validate(validation_loader, device)

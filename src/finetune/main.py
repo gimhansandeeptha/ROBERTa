@@ -91,11 +91,12 @@ import pandas as pd
 class FineTune():
     def __init__(self) -> None:
         self.minimum_entry_requirement=500
-        self.tuned_model = None
+        self.tuned_model = None 
 
     def finetune(self):
         df = self.load_data()
         if df is not None:
+            ## Change the hyperparameter retreval
             data_handler = DataHandler(df,{"train_size":0.7, "test_size":0, "validation_size": 0.3})
             tokenizer = RobertaTokenizer.from_pretrained("roberta-base", truncation=True, do_lower_case=True)
             train, test, val = data_handler.get_dataloaders(tokenizer,256,32,16)
@@ -105,8 +106,10 @@ class FineTune():
             optimizer =torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
             finetune = RobertaFinetune(model=model,optimizer=optimizer,loss_function=loss_function)
             self.tuned_model = finetune.finetune(training_loader=train,validation_loader=val)
+
         else:
             pass
+
 
     def load_data(self):
         '''Fine tuning condiitons:
@@ -122,16 +125,31 @@ class FineTune():
         # print(n_of_entries)
         df = None
         if n_of_entries >= self.minimum_entry_requirement:
-            df = pd.DataFrame(entries, columns=['text', 'sentiment'])
-             # MAke this to return the dataframe required by the finetune 
+            df = pd.DataFrame(entries, columns=['text', 'sentiment']) # MAke this to return the dataframe required by the finetune 
         return df
 
     def save_tuned_model(self,path):
         if self.tuned_model is not None:
             torch.save(self.tuned_model.state_dict(), path)
 
+class Validate():
+    def __init__(self) -> None:
+        pass
+
+    def model_validate(self, checkpoint_path, df):
+        model=RobertaClass(hidden_size=768,dropout_prob=0.3, num_classes=3)
+        checkpoint=torch.load(checkpoint_path)
+
+        model.load_state_dict(checkpoint.get("model_state_dict"))
+
+        LEARNING_RATE = 1e-05        
+        optimizer =torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+        optimizer.load_state_dict(checkpoint.get("optimizer_state_dict"))
+
+        
+
+
 
 tune = FineTune()
 # tune.finetune()
-            
 
