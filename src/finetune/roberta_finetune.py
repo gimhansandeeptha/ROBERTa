@@ -101,6 +101,7 @@ class RobertaFinetune():
                         "Training Accuracy": f"{(n_correct * 100) / nb_tr_examples}%"
                         }
             self.log.enter_log(log_dict)
+            
             # Validation
             if validation_loader is not None:
                 self.validate(validation_loader, device)

@@ -26,7 +26,26 @@ class Database():
         db.create_schema()
         return 
     
-    def insert(self, cases:list):
+    def insert_gpt_sentiment(self, gpt_sentiments:list):
+        """ gpt sentiment is a list of dictionaries each conatain "text" and "sentiment" as keys
+        """
+        db=DatabaseConnection(hostname=hostname,
+                              database=database,
+                              username=username,
+                              password=password
+                              )
+        db.connect()
+        try:
+            for comment in gpt_sentiments:
+                text = comment.get("text")
+                sentiment= comment.get("sentiment")
+                insert_query = f"INSERT INTO gpt (text, sentiment) VALUES ('{text}','{sentiment}')"
+                db.query(insert_query)
+        finally:
+            db.disconnect
+
+    
+    def insert_cases(self, cases:list):
         ''' Value is assumed to be a list with the following format: Incorrect now 
         value = [["case_id 01", "Account_name1",["comment 01","comment 02", ...],["sentiment 01","sentiment 2", ...]], 
                  ["case_id 02", "Account_name2",["comment 01","comment 02", ...],["sentiment 01","sentiment 2", ...]],... 
@@ -57,7 +76,20 @@ class Database():
         finally:
             db.disconnect
 
-    def delete_all(self):
+    def delete_all_gpt_entries(self):
+        db=DatabaseConnection(hostname=hostname,
+                              database=database,
+                              username=username,
+                              password=password
+                              )
+        db.connect()
+        try:
+            query_gpt="DELETE FROM gpt"
+            db.query(query_gpt)
+        finally:
+            db.disconnect()
+
+    def delete_all_cases(self):
         db=DatabaseConnection(hostname=hostname,
                               database=database,
                               username=username,
@@ -71,6 +103,27 @@ class Database():
             db.query(query_account)
         finally:
             db.disconnect()
+
+    def get_gpt_entries(self):
+        result =''
+        query = f"""
+                    SELECT 
+                        text,
+                        sentiment
+                    FROM gpt
+                """
+        db=DatabaseConnection(hostname=hostname,
+                              database=database,
+                              username=username,
+                              password=password
+                              )
+        db.connect()
+        try:
+            result = db.query(query)
+        finally:
+            db.disconnect()
+        return result
+        
 
     def get_cases_by_date(self, start_date, end_date):
         result = ''

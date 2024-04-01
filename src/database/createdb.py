@@ -12,6 +12,7 @@ class CreateDB():
         databaseConnection.connect()
         databaseConnection.query("CREATE DATABASE IF NOT EXISTS {}".format(self.database_name))
         databaseConnection.disconnect
+
     def create_schema(self):
 
         account_table = """
@@ -30,9 +31,16 @@ class CreateDB():
                 FOREIGN KEY (account_case_id) REFERENCES account(case_id)
             )
         """
+        gpt_table = """
+            CREATE TABLE IF NOT EXISTS gpt(
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                text VARCHAR(1024),
+                sentiment VARCHAR(16)
+            )"""
+        
         databaseConnection2 = DatabaseConnection(self.hostname,self.database_name, self.username, self.password)
         databaseConnection2.connect()
-
         databaseConnection2.query(account_table)
         databaseConnection2.query(comment_table)
+        databaseConnection2.query(gpt_table)
         databaseConnection2.disconnect()
