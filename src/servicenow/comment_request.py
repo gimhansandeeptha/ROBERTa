@@ -33,6 +33,7 @@ def get_customer_comments(query_params:dict=None)->json:
         # headers = response.headers
     else:
         raise HTTPException(status_code=response.status_code, detail=response.text)
+    # print(response)
     return response
 
 # query_params = {

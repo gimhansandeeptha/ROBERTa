@@ -65,6 +65,11 @@ class RobertaFinetune():
         return val_loss
     
     def save_checkpoint(self, filepath):
+        # Remove existing .pth files if they exist
+        existing_files = [f for f in os.listdir(os.path.dirname(filepath)) if f.endswith('.pth')]
+        for existing_file in existing_files:
+            os.remove(os.path.join(os.path.dirname(filepath), existing_file))
+
         checkpoint = {
             # After finetuning self.model is either bestmodel with validation is not None, if not validate it is the model tuned for a indicated number of epochs. 
             'model_state_dict': self.model.state_dict(),
@@ -73,9 +78,14 @@ class RobertaFinetune():
         torch.save(checkpoint, filepath)
         # print(f"Checkpoint saved at {filepath}")
 
-
     # Training loop
-    def finetune(self, training_loader, validation_loader=None, device='cpu', epochs=3):
+    def finetune(self, training_loader, validation_loader=None, device='cpu', epochs=3, checkpoint_folder = "models/finetune_checkpoints"):
+        current_date_time = datetime.datetime.now()
+        formatted_date_time = current_date_time.strftime("%Y-%m-%d_%H-%M-%S")
+        file_name = f"{formatted_date_time}.pth"
+        checkpoint_file_path=os.path.join(checkpoint_folder,file_name)
+        # print(checkpoint_file_path)
+        
         for epoch in range(epochs):
             tr_loss = 0
             n_correct = 0
@@ -122,6 +132,8 @@ class RobertaFinetune():
     
         if self.best_model is not None:
             self.model.load_state_dict(self.best_model)
+
+        self.save_checkpoint(checkpoint_file_path)
         return self.model
     
 class Log():

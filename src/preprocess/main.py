@@ -1,9 +1,11 @@
-from .roberta_Sentiment_data import RobertaSentimentData
+from src.preprocess.roberta_Sentiment_data import RobertaSentimentData
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 import json
 import pandas as pd
 from transformers import RobertaTokenizer
+import re
+from bs4 import BeautifulSoup
 
 class DataHandler():
     def __init__(self,df,split_dict:dict=None) -> None:
@@ -27,30 +29,38 @@ class DataHandler():
             raise ValueError(f"Split sizes should sum up to 1 but sum is {split_sum}")
 
     def split_df(self):
-        X,y = self.df['text'].values,self.df['sentiment'].values
+        if round(self.train_size + self.test_size + self.validation_size, 2) != 1.00:
+            raise ValueError("Sizes should sum up to 1")
 
-        if self.train_size==0:
-            x_train = x_val = None
+        X, y = self.df['text'].values, self.df['sentiment'].values
 
-        if self.test_size==0:
-            x_test = y_test = None
-
-        if self.validation_size==0:
-            x_val = y_val = None
-
-        x_train, x_temp, y_train, y_temp = train_test_split(X, y, train_size=self.train_size, stratify=y, random_state=42)
-
-        # Split the temporary set into testing and validation sets
-        test_size = round((self.test_size/(self.test_size+self.validation_size)),1)
-        if test_size == 0:
-            x_val, y_val  = x_temp, y_temp
+        # Check if two of the sizes are 0
+        if self.train_size == 0 and self.test_size == 0:
+            x_train, y_train = None, None
+            x_test, y_test =None, None
+            x_val, y_val =  X, y
+        elif self.train_size == 0 and self.validation_size == 0:
+            x_train, y_train = None, None
+            x_test, y_test = X, y
+            x_val, y_val = None, None
+        elif self.test_size == 0 and self.validation_size == 0:
+            x_train, y_train = X, y
             x_test, y_test = None, None
-        elif test_size == 1:
-            x_val, y_val  = None, None 
-            x_test, y_test = x_temp, y_temp
-
+            x_val, y_val = None, None
         else:
-            x_test, x_val, y_test, y_val = train_test_split(x_temp, y_temp, train_size=test_size, stratify=y_temp, random_state=42)
+            x_train, x_temp, y_train, y_temp = train_test_split(X, y, train_size=self.train_size, stratify=y, random_state=42)
+
+            # Split the temporary set into testing and validation sets
+            test_size = round((self.test_size/(self.test_size+self.val_size)),1)
+            if test_size == 0:
+                x_val, y_val  = x_temp, y_temp
+                x_test, y_test = None, None
+            elif test_size == 1:
+                x_val, y_val  = None, None 
+                x_test, y_test = x_temp, y_temp
+
+            else:
+                x_test, x_val, y_test, y_val = train_test_split(x_temp, y_temp, train_size=test_size, stratify=y_temp, random_state=42)
 
         return x_train, y_train, x_test, y_test, x_val, y_val
     
@@ -81,11 +91,46 @@ class DataHandler():
                         'num_workers': 0
                         }
             validation_loader = DataLoader(validation_set, **validation_params)
-
-        
-
         return training_loader, testing_loader, validation_loader
 
+
+class DataCleaner:
+    from src.servicenow.data_object import SentimentData
+    def __init__(self, sentiment_data: SentimentData) -> None:
+        self.cases = sentiment_data.cases
+
+    def clean(self):
+        for case in self.cases:
+            for entry in case.get('entries'):
+                comment = entry.get('value')
+                plain_text = self._html_to_text(comment)
+                normalized_text = self._normalize_texts(plain_text)
+                entry['value'] = normalized_text  # Replace the value (i.e. Comment) with the cleaned comment.
+        # return self.cases
+
+    def _normalize_texts(self, text):
+        """Normalize one sentense 
+        This function is only called within internal methods
+        """
+        NON_ALPHANUM = re.compile(r'[^a-z0-9,.\s]')  # Exclude all non-alphanumeric characters except comma and dot
+        NON_ASCII = re.compile(r'[\x20-\x7E]+')      # Exclude all characters that are not lowercase letters, digits, or whitespace
+
+        ascii_chars = NON_ASCII.findall(text)
+        lower_text = ascii_chars[0].lower()
+        alphanumeric_text = NON_ALPHANUM.sub(r'', lower_text)
+        return alphanumeric_text
+
+    def _html_to_text(self, html_content):
+        """Convert html content into plain text
+        This function is only called within internal methods
+        """
+        # Parse HTML content
+        soup = BeautifulSoup(html_content, 'html.parser')
+        text = soup.get_text(separator=' ', strip=True)
+
+        # Remove extra whitespaces
+        text = re.sub(r'\s+', ' ', text) 
+        return text
 
 # def load_data():
 #     json_file_path = "data\\Software.json"
@@ -127,3 +172,23 @@ class DataHandler():
 # tokenizer = RobertaTokenizer.from_pretrained("roberta-base", truncation=True, do_lower_case=True)
 # train, test, val = data_handler.get_dataloaders(tokenizer,256,32,16)
 # print(train, test, val)
+    
+
+## DataCleaner Tests
+# # Example HTML content
+# html_content = """
+# <html>
+# <head><title>Test HTML</title></head>
+# <body>
+# <h1>This is a heading</h1>
+# <p>This is a paragraph with <a href="https://example.com">a link</a>.</p>
+# </body>
+# </html>
+# """
+
+# # Convert HTML to plain text
+# plain_text = html_to_text(html_content)
+# print(f"plain_text: {plain_text}")
+
+# normalized_text = normalize_texts(plain_text)
+# print(f"normalized Text: {normalized_text}")

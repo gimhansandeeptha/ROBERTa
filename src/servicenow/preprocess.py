@@ -1,4 +1,4 @@
-from .comment_request import get_customer_comments
+from src.servicenow.comment_request import get_customer_comments
 
 def extract_messages(response):
     ''' Return two dimentional array, fist dimention is the account name and the second dimention is liat of comments

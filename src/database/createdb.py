@@ -30,7 +30,7 @@ class CreateDB():
                 account_case_id VARCHAR(16),
                 FOREIGN KEY (account_case_id) REFERENCES account(case_id)
             )
-        """
+        """ 
         gpt_table = """
             CREATE TABLE IF NOT EXISTS gpt(
                 id INT AUTO_INCREMENT PRIMARY KEY,

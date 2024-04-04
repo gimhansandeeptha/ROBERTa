@@ -2,6 +2,7 @@ from .connectdb import DatabaseConnection
 from .createdb import CreateDB
 from dotenv import load_dotenv
 import os
+from src.servicenow.data_object import SentimentData
 
 environment_variable_file_path = ".\\src\\database\\.env"
 load_dotenv(environment_variable_file_path)
@@ -45,7 +46,7 @@ class Database():
             db.disconnect
 
     
-    def insert_cases(self, cases:list):
+    def insert_cases(self, sentiment_data:SentimentData):
         ''' Value is assumed to be a list with the following format: Incorrect now 
         value = [["case_id 01", "Account_name1",["comment 01","comment 02", ...],["sentiment 01","sentiment 2", ...]], 
                  ["case_id 02", "Account_name2",["comment 01","comment 02", ...],["sentiment 01","sentiment 2", ...]],... 
@@ -58,7 +59,7 @@ class Database():
                               )
         db.connect()
         try:
-            for case in cases:
+            for case in sentiment_data.cases:
                 case_id = case.get('case_id')
                 account_name = case.get('account')
                 sys_created_on = case.get('sys_created_on')
