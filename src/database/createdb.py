@@ -35,7 +35,8 @@ class CreateDB():
             CREATE TABLE IF NOT EXISTS gpt(
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 text VARCHAR(1024),
-                sentiment VARCHAR(16)
+                sentiment VARCHAR(16),
+                sys_created_on DATETIME
             )"""
         
         databaseConnection2 = DatabaseConnection(self.hostname,self.database_name, self.username, self.password)

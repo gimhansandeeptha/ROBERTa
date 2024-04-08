@@ -20,7 +20,7 @@ robertaApp.start_model()
 
 def schedule_task1():
     schedular = BackgroundScheduler()
-    schedular.add_job(func=process, trigger='cron', hour=9, minute=20, second=0)
+    schedular.add_job(func=process, trigger='cron', hour=12, minute=20, second=0)
     schedular.start()
 
 def schedule_task2():

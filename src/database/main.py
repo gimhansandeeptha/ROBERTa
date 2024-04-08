@@ -3,6 +3,7 @@ from .createdb import CreateDB
 from dotenv import load_dotenv
 import os
 from src.servicenow.data_object import SentimentData
+from datetime import datetime
 
 environment_variable_file_path = ".\\src\\database\\.env"
 load_dotenv(environment_variable_file_path)
@@ -15,33 +16,54 @@ database = 'sentiment'
 
 class Database():
     def __init__(self) -> None:
-        pass
+        self.hostname = hostname
+        self.database_name = database
+        self.username = username
+        self.password = password
+
+    def _check_database_existance(self):
+        db=DatabaseConnection(hostname = self.hostname,
+                              database = None,
+                              username = self.username,
+                              password = self.password
+                              )
+        db.connect()
+        check_query = "SHOW DATABASES"
+        db_list = db.query(check_query)
+        db.disconnect()
+        if (self.database_name,) in db_list:
+            return True
+        else:
+            return False
+
 
     def create(self):
-        db=CreateDB(hostname=hostname,
-                    database_name=database,
-                    username=username,
-                    password=password
-                    )
-        db.create()
-        db.create_schema()
+        if not self._check_database_existance():  
+            db=CreateDB(hostname = self.hostname,
+                        database_name = self.database_name,
+                        username = self.username,
+                        password = self.password
+                        )
+            db.create()
+            db.create_schema()
         return 
     
-    def insert_gpt_sentiment(self, gpt_sentiments:list):
-        """ gpt sentiment is a list of dictionaries each conatain "text" and "sentiment" as keys
-        """
-        db=DatabaseConnection(hostname=hostname,
-                              database=database,
-                              username=username,
-                              password=password
+    def insert_gpt_sentiment(self, sentiment_data: SentimentData):
+        db=DatabaseConnection(hostname = self.hostname,
+                              database = self.database_name,
+                              username = self.username,
+                              password = self.password
                               )
         db.connect()
         try:
-            for comment in gpt_sentiments:
-                text = comment.get("text")
-                sentiment= comment.get("sentiment")
-                insert_query = f"INSERT INTO gpt (text, sentiment) VALUES ('{text}','{sentiment}')"
-                db.query(insert_query)
+            for case in sentiment_data.cases:
+                entries = case.get('entries')
+                for comment in entries:
+                    text = comment.get("value")
+                    sentiment = comment.get("gpt_sentiment", None)
+                    created_on = comment.get("created_on", datetime.now())
+                    insert_query = f"INSERT INTO gpt (text, sentiment, sys_created_on) VALUES ('{text}','{sentiment}','{created_on}')"
+                    db.query(insert_query)
         finally:
             db.disconnect
 
@@ -62,7 +84,7 @@ class Database():
             for case in sentiment_data.cases:
                 case_id = case.get('case_id')
                 account_name = case.get('account')
-                sys_created_on = case.get('sys_created_on')
+                sys_created_on = case.get('sys_created_on',datetime.now())
                 entries = case.get('entries')
 
                 insert_account = f"INSERT INTO account (case_id, sys_created_on, account_name) VALUES ('{case_id}','{sys_created_on}','{account_name}')"
@@ -105,13 +127,28 @@ class Database():
         finally:
             db.disconnect()
 
-    def get_gpt_entries(self):
-        result =''
+    def get_gpt_entries(self, count):
+        result = None
         query = f"""
-                    SELECT 
-                        text,
-                        sentiment
-                    FROM gpt
+                WITH RankedData AS (
+                SELECT
+                    id,
+                    text,
+                    sentiment,
+                    sys_created_on,
+                    ROW_NUMBER() OVER (PARTITION BY sentiment ORDER BY sys_created_on DESC) AS rn
+                FROM
+                    gpt
+                )
+                SELECT
+                    id,
+                    text,
+                    sentiment,
+                    sys_created_on
+                FROM
+                    RankedData
+                WHERE
+                    rn <= {count};
                 """
         db=DatabaseConnection(hostname=hostname,
                               database=database,
@@ -150,6 +187,93 @@ class Database():
         finally:
             db.disconnect()
         return result
+    
+    def get_sentiment_category_count(self):
+        count_query = '''
+                    SELECT
+                        sentiment,
+                        COUNT(*) AS total_count
+                    FROM
+                        gpt
+                    GROUP BY
+                        sentiment;
+                    '''
+        db=DatabaseConnection(hostname=hostname,
+                              database=database,
+                              username=username,
+                              password=password
+                              )
+        db.connect()
+        try:
+            result = db.query(count_query)
+        finally:
+            db.disconnect()
+        
+        count_dict ={}
+        for sentiment_label, count in result:
+            count_dict[sentiment_label] = count
+
+        return count_dict
+    
+    def delete_excessive_gpt_data(self, sentiment_label, count_to_delete:int):
+        delete_query = f'''
+                        DELETE FROM GPT
+                        WHERE sentiment = '{sentiment_label}'
+                        AND id IN (
+                            SELECT id
+                            FROM (
+                                SELECT id
+                                FROM GPT
+                                WHERE sentiment = '{sentiment_label}'
+                                ORDER BY sys_created_on ASC
+                                LIMIT {count_to_delete}
+                            ) AS subquery
+                        );
+                        '''
+        db=DatabaseConnection(hostname=hostname,
+                        database=database,
+                        username=username,
+                        password=password
+                        )
+        db.connect()
+        try:
+            result = db.query(delete_query)
+        finally:
+            db.disconnect()
+                
+    
+    # def get_gpt_entries(self, entry_count):
+    #     query1 = f"""
+    #             WITH RankedComments AS (
+    #             SELECT 
+    #                 text,
+    #                 sentimet,
+    #                 ROW_NUMBER() OVER (PARTITION BY sentimet ORDER BY date_column DESC) AS rn
+    #             FROM 
+    #                 gpt
+    #             )
+    #             SELECT 
+    #             text,
+    #             sentimet
+    #             FROM 
+    #             RankedComments
+    #             WHERE 
+    #             rn <= {entry_count//3};
+    #         """
+    #     result = ''
+        
+    #     db=DatabaseConnection(hostname=hostname,
+    #                           database=database,
+    #                           username=username,
+    #                           password=password
+    #                           )
+    #     db.connect()
+    #     try:
+    #         result = db.query(query1)
+    #     finally:
+    #         db.disconnect()
+    #     # return result
+    #     print(result)
 
 
 # # Unit Testing
@@ -167,3 +291,19 @@ class Database():
 # db = Database()
 # result = db.get_cases_by_date("2024-03-19","2024-03-19")
 # print(result)
+
+
+# # Unit testing: _check_database_existance
+# db = Database()
+# result = db._check_database_existance()
+# print(result)
+        
+# # Unit testing for create()
+# db = Database()
+# db.create()
+        
+# # Unit testing for _get_sentiment_category_count
+# db = Database()
+# result = db.get_sentiment_category_count()
+# for sentimet_label, count in result:
+#     print(f"sentiment: {sentimet_label}             count: {count}")

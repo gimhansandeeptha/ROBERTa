@@ -11,9 +11,9 @@ class RobertaFinetune():
         self.optimizer = optimizer
         self.early_stopping_patience = early_stopping_patience
         self.min_val_loss = float('inf')
-        self.best_model=None
-        self.no_improvement_count=0
-        self.log=Log()
+        self.best_model = None
+        self.no_improvement_count = 0
+        self.log = Log()
 
     def calculate_accuracy(self,preds, targets):
         n_correct = (preds==targets).sum().item()

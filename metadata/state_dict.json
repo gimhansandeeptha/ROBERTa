@@ -1,5 +1,6 @@
 {
     "latest":{
-        "path": "C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\models\\state_dict.pth"
+        "path": "C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\models\\state_dict.pth",
+        "finetune_count": 0
     }
 }

@@ -26,6 +26,6 @@ class API():
             messages = extract_messages(response)
             processed_messages = processed_messages + messages
         # await shared_resource.set_data(processed_messages)
-        # print(processed_messages)
+        print(processed_messages)
         sentiment_data.load_data(processed_messages)
         # return sentiment_data

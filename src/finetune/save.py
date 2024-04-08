@@ -11,8 +11,6 @@ def save_model_dict(model, path):
                 'model_state_dict': model.state_dict(),
                 'loss': 2.134,
                 }, path)
-    
-    
 
 def load_model(model, path):
     '''Load the initialized model with the state dict in the path

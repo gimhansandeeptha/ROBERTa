@@ -39,7 +39,6 @@ class DatabaseConnection:
             Return the list consist of quary output.
         ''' 
         result = []
-
         self.cursor = self.connection.cursor()
         self.cursor.execute(query)
 
@@ -51,13 +50,12 @@ class DatabaseConnection:
         else:
             for row in self.cursor:
                 result.append(row)
-
         return result
 
     def count(self, table, condition = None):
         return len(self.simple_query(table, '*', condition))
 
-
+## Tests
 # query1 = "INSERT INTO account (case_id, account_name) VALUES ('CS0426786','ParaTestAccount6')"
 # db=DatabaseConnection(hostname='localhost',
 #                               database='sentiment',
