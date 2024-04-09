@@ -1,6 +1,6 @@
 import torch
 from transformers import RobertaTokenizer
-from ..model.roberta import RobertaClass
+from src.model.roberta import RobertaClass
 
 class Model():
     ''' Actual implementation to load the model. 

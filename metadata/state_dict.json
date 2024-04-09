@@ -1,6 +1,6 @@
 {
-    "latest":{
-        "path": "C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\models\\state_dict.pth",
-        "finetune_count": 0
+    "latest": {
+        "path": "models\\finetune_checkpoints\\2024-04-09_12-00-41.pth",
+        "finetune_count": 3
     }
 }

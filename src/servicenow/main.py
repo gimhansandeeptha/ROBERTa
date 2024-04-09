@@ -1,7 +1,7 @@
-from .comment_request import get_customer_comments
-from .query_param import get_query_param
-from .servicenow_access import service_now_authorize, service_now_refresh_token
-from .preprocess import extract_messages
+from src.servicenow.comment_request import get_customer_comments
+from src.servicenow.query_param import get_query_param
+from src.servicenow.servicenow_access import service_now_authorize, service_now_refresh_token
+from src.servicenow.preprocess import extract_messages
 from src.servicenow.data_object import SentimentData
 # from .shared_data import SharedResource
 import json

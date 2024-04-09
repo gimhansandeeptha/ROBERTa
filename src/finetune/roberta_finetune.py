@@ -2,11 +2,12 @@ import torch
 from tqdm import tqdm
 import datetime
 import os
+from src.model.roberta import RobertaClass
 
 class RobertaFinetune():
     def __init__(self, model, optimizer, loss_function, early_stopping_patience=3) -> None:
         # Creating the loss function and optimizer
-        self.model = model
+        self.model: RobertaClass = model
         self.loss_function = loss_function
         self.optimizer = optimizer
         self.early_stopping_patience = early_stopping_patience
@@ -61,15 +62,9 @@ class RobertaFinetune():
             self.no_improvement_count = 0
         else:
             self.no_improvement_count += 1
-
         return val_loss
     
     def save_checkpoint(self, filepath):
-        # Remove existing .pth files if they exist
-        existing_files = [f for f in os.listdir(os.path.dirname(filepath)) if f.endswith('.pth')]
-        for existing_file in existing_files:
-            os.remove(os.path.join(os.path.dirname(filepath), existing_file))
-
         checkpoint = {
             # After finetuning self.model is either bestmodel with validation is not None, if not validate it is the model tuned for a indicated number of epochs. 
             'model_state_dict': self.model.state_dict(),

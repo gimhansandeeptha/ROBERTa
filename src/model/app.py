@@ -1,7 +1,7 @@
-from ..inference.inference import Inference
-from .model import Model
 import json
-from ..model.roberta import RobertaClass
+from src.inference.inference import Inference
+from src.model.model import Model
+from model.roberta import RobertaClass
 
 class App():
     ''' Model initilization and inferncing. Generic class for all Roberta models.
