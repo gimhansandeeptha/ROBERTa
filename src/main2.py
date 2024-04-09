@@ -2,17 +2,17 @@ from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 from contextlib import asynccontextmanager
 import uvicorn
-from .servicenow.main import API
+from src.servicenow.main import API
 import threading
-from .finetune.main import run_finetune
+from src.finetune.main import run_finetune
 # Changing the order of following two imports leads to an error (dependency conflict) #check
-from .model.roberta import RobertaClass
-from .inference.main import get_sentiments
+from src.model.roberta import RobertaClass
+from src.inference.main import get_sentiments
 
-from .model.app import App
-from .database.main import Database
+from src.model.app import App
+from src.database.main import Database
 
-from .api.main import router
+from src.api.main import router
 
 # Replace the models file path in the models directory. 
 robertaApp = App(metadata_path = "metadata\\roberta.json")

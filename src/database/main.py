@@ -1,9 +1,9 @@
-from .connectdb import DatabaseConnection
-from .createdb import CreateDB
 from dotenv import load_dotenv
 import os
-from src.servicenow.data_object import SentimentData
 from datetime import datetime
+from src.database.connectdb import DatabaseConnection
+from src.database.createdb import CreateDB
+from src.servicenow.data_object import SentimentData
 
 environment_variable_file_path = ".\\src\\database\\.env"
 load_dotenv(environment_variable_file_path)

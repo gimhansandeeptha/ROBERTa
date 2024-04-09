@@ -3,7 +3,7 @@ from fastapi import HTTPException
 import json
 import os 
 from dotenv import  dotenv_values  , load_dotenv
-from .servicenow_access import service_now_refresh_token
+from src.servicenow.servicenow_access import service_now_refresh_token
 
 base_url = "https://wso2sndev.service-now.com/api/wso2/customer_health/get_customer_comments"
 environment_variable_file_path = "src/servicenow/.env"

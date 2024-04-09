@@ -4,7 +4,6 @@ from src.servicenow.servicenow_access import service_now_authorize, service_now_
 from src.servicenow.preprocess import extract_messages
 from src.servicenow.data_object import SentimentData
 # from .shared_data import SharedResource
-import json
 
 start = 0
 page_size= 5

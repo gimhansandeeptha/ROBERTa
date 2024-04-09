@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException, Request
-from ..model.app import App
-from ..model.roberta import RobertaClass
-import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+from src.model.app import App
+from src.model.roberta import RobertaClass
+import uvicorn
 
 # Replace the models file path in the models directory. 
 robertaApp = App(metadata_path = "metadata\\roberta.json") # C:\\Users\\gimhanSandeeptha\\Gimhan Sandeeptha\\Sentiment Project\\ROBERTa\\metadata\\roberta.json

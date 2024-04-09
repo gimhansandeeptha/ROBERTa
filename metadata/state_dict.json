@@ -1,6 +1,6 @@
 {
     "latest": {
-        "path": "models\\finetune_checkpoints\\2024-04-09_12-00-41.pth",
-        "finetune_count": 3
+        "path": "models\\finetune_checkpoints\\2024-04-09_15-31-19.pth",
+        "finetune_count": 5
     }
 }

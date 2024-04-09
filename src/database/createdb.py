@@ -1,4 +1,4 @@
-from .connectdb import DatabaseConnection
+from src.database.connectdb import DatabaseConnection
 
 class CreateDB():
     def __init__(self, hostname, database_name, username, password) -> None:

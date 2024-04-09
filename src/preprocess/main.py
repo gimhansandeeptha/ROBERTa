@@ -1,4 +1,3 @@
-from src.preprocess.roberta_Sentiment_data import RobertaSentimentData
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 import json
@@ -6,9 +5,10 @@ import pandas as pd
 from transformers import RobertaTokenizer
 import re
 from bs4 import BeautifulSoup
+from src.preprocess.roberta_Sentiment_data import RobertaSentimentData
 
 class DataHandler():
-    def __init__(self,df,split_dict:dict=None) -> None:
+    def __init__(self,df:pd.DataFrame, split_dict:dict=None) -> None:
         columns_list = df.columns.tolist()
         # Check if both "text" and "sentiment" are present in the column names
         if "text" not in columns_list or "sentiment" not in columns_list:
@@ -24,11 +24,11 @@ class DataHandler():
             self.test_size = split_dict.get("test_size",0)
             self.validation_size = split_dict.get("validation_size",0)
 
-        split_sum  = self.train_size+self.test_size+self.validation_size
+        split_sum  = self.train_size + self.test_size + self.validation_size
         if split_sum != 1:
             raise ValueError(f"Split sizes should sum up to 1 but sum is {split_sum}")
 
-    def split_df(self):
+    def _split_df(self):
         if round(self.train_size + self.test_size + self.validation_size, 2) != 1.00:
             raise ValueError("Sizes should sum up to 1")
 
@@ -65,7 +65,7 @@ class DataHandler():
         return x_train, y_train, x_test, y_test, x_val, y_val
     
     def get_dataloaders(self, tokenizer, max_len, train_batch_size=None, validation_batch_size=None):
-        x_train, y_train, x_test, y_test, x_val, y_val = self.split_df()
+        x_train, y_train, x_test, y_test, x_val, y_val = self._split_df()
         training_loader = testing_loader = validation_loader = None
 
         if x_train is not None:

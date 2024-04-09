@@ -1,9 +1,8 @@
-from .data import data
-
-from ..model.roberta import RobertaClass
-from .processor import get_device
-from .model import BuildModel
 import torch
+from src.train.data import data
+from src.model.roberta import RobertaClass
+from src.train.processor import get_device
+from src.train.model import BuildModel
 
 device = get_device()
 model = RobertaClass(hidden_size=768,dropout_prob=0.3, num_classes=3)

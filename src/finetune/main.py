@@ -1,37 +1,36 @@
-from src.model.roberta import RobertaClass
-from src.train.processor import get_device
-from src.train.model import BuildModel
-from src.train.data import data
-
-from src.preprocess.main import DataHandler
-from src.finetune.roberta_finetune import RobertaFinetune
-from transformers import RobertaTokenizer
-from src.database.main import Database
 import torch
 import pandas as pd
 import json
 import os
 from datetime import datetime
+from src.model.roberta import RobertaClass
+from src.train.processor import get_device
+from src.train.model import BuildModel
+from src.train.data import data
+from src.preprocess.main import DataHandler
+from src.finetune.roberta_finetune import RobertaFinetune
+from transformers import RobertaTokenizer
+from src.database.main import Database
 
 METADATA_PATH = "metadata/state_dict.json"
 class Handler:
     def __init__(self) -> None:
-        self.entry_count_per_label=500
+        self.entry_count_per_label= 32 # Put 500 for production
         self.maximum_entry_count_per_label=self.entry_count_per_label*7
         self.metadata_path = METADATA_PATH
         self.db = Database()
         self.df: pd.DataFrame|None = None
     
-    def _get_finetuned_count(self):
+    def _get_finetuned_count(self) -> int:
         with open(self.metadata_path, 'r') as file:
-            data = json.load(file)
-        return data.get("finetune_count")
+            data: dict = json.load(file)
+        return data.get("latest",{}).get("finetune_count")
     
     def _update_finetuned_count(self, new_value):
         # Read existing JSON data from the file
         with open(self.metadata_path, 'r') as file:
             data = json.load(file)
-        data['finetune_count'] = new_value
+        data["latest"]["finetune_count"] = new_value
         with open(self.metadata_path, 'w') as file:
             json.dump(data, file, indent=4)
 
@@ -41,8 +40,19 @@ class Handler:
         for sentiment, count in sentiment_count.items():
             count_to_delete = count - self.maximum_entry_count_per_label
             if count_to_delete > 0:
-                self.db.delete_excessive_gpt_data(sentiment, count_to_delete)       
-    
+                self.db.delete_excessive_gpt_data(sentiment, count_to_delete)
+
+    def _map_sentiment(self, sentiment):
+        if sentiment == 'Negative':
+            return 0
+        elif sentiment == 'Neutral':
+            return 1
+        elif sentiment == 'Positive':
+            return 2
+        else:
+            print(f"Illegal sentiment: {sentiment}")
+            return None
+        
     def _load_data(self): # count represent the class count (like 500 datapoints)
         '''Fine tuning condiitons: ##Update not correct now
             There need to be adiquate amount of data. (1000 data points)
@@ -55,7 +65,9 @@ class Handler:
         result = self.db.get_gpt_entries(self.entry_count_per_label)
         df = None
         if result is not None:
-            df = pd.DataFrame(result, columns=['id','text', 'sentiment', 'datetime']) # MAke this to return the dataframe required by the finetune 
+            df = pd.DataFrame(result, columns=['id','text', 'sentiment', 'datetime']) 
+            df['sentiment'] = df['sentiment'].apply(self._map_sentiment)
+            df.dropna(inplace=True) 
         self.df = df
 
     def finetune(self):
