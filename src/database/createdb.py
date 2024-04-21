@@ -25,7 +25,7 @@ class CreateDB():
         comment_table = """
             CREATE TABLE IF NOT EXISTS comment (
                 id INT  AUTO_INCREMENT PRIMARY KEY,
-                comment VARCHAR(1024),
+                comment VARCHAR(2048),
                 sentiment VARCHAR(16),
                 account_case_id VARCHAR(16),
                 FOREIGN KEY (account_case_id) REFERENCES account(case_id)
@@ -34,7 +34,7 @@ class CreateDB():
         gpt_table = """
             CREATE TABLE IF NOT EXISTS gpt(
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                text VARCHAR(1024),
+                text VARCHAR(2048),
                 sentiment VARCHAR(16),
                 sys_created_on DATETIME
             )"""

@@ -131,6 +131,7 @@ class RobertaFinetune():
         self.save_checkpoint(checkpoint_file_path)
         return self.model
     
+    
 class Log():
     def __init__(self) -> None:
         self.max_file_count=20

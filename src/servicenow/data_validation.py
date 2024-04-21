@@ -54,7 +54,6 @@ class Case(BaseModel):
     sys_created_on_adjusted: str
     account: str
 
-
 class Result(BaseModel):
     cases: List[Case]
 

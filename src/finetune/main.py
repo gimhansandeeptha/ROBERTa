@@ -17,6 +17,7 @@ class Handler:
     def __init__(self) -> None:
         self.entry_count_per_label= 32 # Put 500 for production
         self.maximum_entry_count_per_label=self.entry_count_per_label*7
+        self.max_finetuned_count = 5 # After this many finetuning it goes to validation
         self.metadata_path = METADATA_PATH
         self.db = Database()
         self.df: pd.DataFrame|None = None
@@ -69,6 +70,12 @@ class Handler:
             df['sentiment'] = df['sentiment'].apply(self._map_sentiment)
             df.dropna(inplace=True) 
         self.df = df
+    
+    def _get_checkpoint_path(self):
+        with open(self.metadata_path, 'r') as file:
+            data: dict = json.load(file)
+        return data.get("latest",{}).get("path")
+    
 
     def finetune(self):
         """ This perfroms either finetuning or validating."""
@@ -82,15 +89,17 @@ class Handler:
 
         if self.df is not None:
             finetuned_count = self._get_finetuned_count()
-            if finetuned_count < 5:
+            checkpoint_path = self._get_checkpoint_path()
+            if finetuned_count < self.max_finetuned_count:
                 finetune = FineTune()
-                finetune.finetune(self.df)
+                finetune.finetune(checkpoint_path, self.df)
                 self._update_finetuned_count(finetuned_count+1)
                 finetune.save_checkpoint(self.metadata_path)
             else:
                 validate = Validate()
-                validate.model_validate('insert actual checkpoint path', self.df)
-                validate.save_checkpoint(self.metadata_path)
+                validate.model_validate(checkpoint_path, self.df)
+                validate.save_checkpoint()
+                self._update_finetuned_count(0)
 
 
 class FineTune:
@@ -98,20 +107,24 @@ class FineTune:
         self.tuned_model = None 
         self.finetuned_obj = None
 
-    def finetune(self, df):
+    def finetune(self, checkpoint_path, df):
         if df is not None:
             ## Change the hyperparameter retreval
             data_handler = DataHandler(df,{"train_size":1.0, "test_size":0, "validation_size": 0.0})
             tokenizer = RobertaTokenizer.from_pretrained("roberta-base", truncation=True, do_lower_case=True)
             train, test, val = data_handler.get_dataloaders(tokenizer,256,32,16)
             model = RobertaClass(hidden_size=768,dropout_prob=0.3, num_classes=3)
+            checkpoint=torch.load(checkpoint_path)
+            model.load_state_dict(checkpoint.get("model_state_dict"))
+
             loss_function = torch.nn.CrossEntropyLoss()
             LEARNING_RATE = 1e-05
             optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+            optimizer.load_state_dict(checkpoint.get("optimizer_state_dict"))
+
             finetune = RobertaFinetune(model=model,optimizer=optimizer,loss_function=loss_function)
             self.tuned_model = finetune.finetune(training_loader=train,validation_loader=val)
             self.finetuned_obj = finetune
-
             # Code to remove the data points used in the database goes here. 
         else:
             pass
@@ -119,7 +132,7 @@ class FineTune:
     
     def save_checkpoint(self, metadata_path):
         with open(metadata_path, 'r') as file:
-            data = json.load(file)
+            data: dict = json.load(file)
         finetune_count = data.get("latest", {}).get("finetune_count")
 
         checkpoint_path = data.get("latest", {}).get("path")
@@ -197,7 +210,6 @@ class Validate:
                 print(f"The file {checkpoint_path} does not exist.")
 
 
-
 ### --------------------Testing--------------------- 
 # def load_data():
 #     import json
@@ -267,3 +279,6 @@ class Validate:
 # result = fine_tune._load_data(10)
 # print(result.head())
 
+## Intragration test for Handler 
+# handler = Handler()
+# handler.finetune()

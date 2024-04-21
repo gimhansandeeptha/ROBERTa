@@ -11,8 +11,16 @@ class Model():
     def get_model(self,saved_model_path):
         ''' Returns the model in the indicated path.
         '''
-        loaded_model = torch.load(saved_model_path,map_location=torch.device('cpu'))   ### change 
-        self.model = loaded_model
+        print("src.model.model.Model")
+        # loaded_model = torch.load(saved_model_path,map_location=torch.device('cpu'))   ### change 
+        # self.model = loaded_model
+        # return self.model
+
+        checkpoint: dict=torch.load(saved_model_path)
+        model_state_dict = checkpoint.get("model_state_dict")
+        model = RobertaClass() # This model can be changed to different model architecture. in roberta_models folder.
+        self.model = model
+        self.model.load_state_dict(model_state_dict)
         return self.model
     
     def get_model_tokenizer(self, tokenizer_name:str):

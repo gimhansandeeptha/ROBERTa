@@ -1,7 +1,7 @@
 import json
 from src.inference.inference import Inference
 from src.model.model import Model
-from model.roberta import RobertaClass
+from src.model.roberta import RobertaClass
 
 class App():
     ''' Model initilization and inferncing. Generic class for all Roberta models.
@@ -18,9 +18,17 @@ class App():
         except json.JSONDecodeError:
             print("Invalid JSON data in the file.") 
 
-        self.model_file_path = data['model']['trained_model_path']
-        self.max_len = data['model']['max_len'] 
-        self.tokenizer_name = data['model']['tokenizer']
+        print("self.model_file_path = data['model']['trained_model_path'] src.model.app")
+        # self.model_file_path = data['model']['trained_model_path']
+        # self.max_len = data['model']['max_len'] 
+        # self.tokenizer_name = data['model']['tokenizer']
+        # self.device = 'cpu'                                        ### change 
+        # self.model = None 
+        # self.inference = None
+
+        self.model_file_path = "models\\your_model.pth"
+        self.max_len = 256
+        self.tokenizer_name = "RobertaTokenizer_1"
         self.device = 'cpu'                                        ### change 
         self.model = None 
         self.inference = None
