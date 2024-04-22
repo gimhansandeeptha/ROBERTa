@@ -73,10 +73,10 @@ class Handler:
     def finetune(self):
         """ This perfroms either finetuning or validating."""
         # finetuning or validating call
-        # Model handling 
+        # Model handling
         # Model saving
-        # Delete used data 
-
+        # Delete used data
+        
         self._delete_excessive_data()
         self._load_data()
 
@@ -95,6 +95,12 @@ class Handler:
                 validate = Validate()
                 validate.model_validate(checkpoint_path, self.df)
                 validate.save_checkpoint()
+                with open(self.metadata_path, 'r') as file:
+                    data: dict = json.load(file)
+                data["latest"]["finetune_count"] = 0
+                with open(self.metadata_path, 'w') as file:
+                    json.dump(data, file, indent=4)
+
 
 class FineTune:
     def __init__(self) -> None:

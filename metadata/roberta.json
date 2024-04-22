@@ -12,8 +12,8 @@
         "name": "roberta",
         "tokenizer": "RobertaTokenizer_1",
         "version": "1.0.0",
-        "trained_model_path": "models/stable/2024-04-22_07-46-31.pth",
-        "validation_loss": 1.0904473861058552
+        "trained_model_path": "models/stable\\2024-04-22_09-34-54.pth",
+        "validation_loss": 1.0845372676849365
     },
     "data": {
         "data_path": "ROBERTa/data/Software.json"

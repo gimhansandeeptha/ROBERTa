@@ -4,7 +4,7 @@ import asyncio
 
 class GPT:
     def __init__(self) -> None:
-        self.client = OpenAI(api_key="sk-proj-PQexDDvyDv1CRNnVKbkeT3BlbkFJfe03kKQX59UgbF6fCLyi")
+        self.client = OpenAI(api_key="actual API key")
         self.instruction = "You will be provided with a text, and your task is to classify its sentiment as Positive, Neutral, or Negative."
         self.model = "gpt-3.5-turbo"
         self.instruction_role = "system"

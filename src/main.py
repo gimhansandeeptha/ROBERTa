@@ -17,7 +17,6 @@ from src.finetune.open_ai.main import APICall
 from src.servicenow.data_object import SentimentData
 from src.finetune.main import Handler
 
-
 # Replace the models file path in the models directory. 
 # robertaApp = App(metadata_path = "metadata\\roberta.json")
 # robertaApp.start_model()
