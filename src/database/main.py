@@ -36,7 +36,6 @@ class Database():
         else:
             return False
 
-
     def create(self):
         if not self._check_database_existance():  
             db=CreateDB(hostname = self.hostname,
@@ -67,7 +66,6 @@ class Database():
         finally:
             db.disconnect
 
-    
     def insert_cases(self, sentiment_data:SentimentData):
         ''' Value is assumed to be a list with the following format: Incorrect now 
         value = [["case_id 01", "Account_name1",["comment 01","comment 02", ...],["sentiment 01","sentiment 2", ...]], 
@@ -161,7 +159,6 @@ class Database():
         finally:
             db.disconnect()
         return result
-        
 
     def get_cases_by_date(self, start_date, end_date):
         result = ''

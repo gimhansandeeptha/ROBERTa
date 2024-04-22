@@ -4,8 +4,8 @@ import asyncio
 
 class GPT:
     def __init__(self) -> None:
-        self.client = OpenAI(api_key="Your API key")
-        self.instruction = "You will be provided with a text, and your task is to classify its sentiment as positive, neutral, or negative."
+        self.client = OpenAI(api_key="sk-proj-PQexDDvyDv1CRNnVKbkeT3BlbkFJfe03kKQX59UgbF6fCLyi")
+        self.instruction = "You will be provided with a text, and your task is to classify its sentiment as Positive, Neutral, or Negative."
         self.model = "gpt-3.5-turbo"
         self.instruction_role = "system"
         self.user_role = "user"
@@ -14,23 +14,26 @@ class GPT:
         self.top_p = 1
 
     async def get_response(self, text:str):
-        response = self.client.chat.completions.create(
-                model = self.model,
-                messages = [
-                    {
-                        "role" : self.instruction_role,
-                        "content" : self.instruction
-                    },
-                    {
-                        "role" : self.user_role,
-                        "content" : text
-                    }
-                ],
-                temperature = self.temperature,
-                max_tokens = self.max_tokens,
-                top_p = self.top_p
-        )
-        return response.choices[0].message.content
+        # response = self.client.chat.completions.create(
+        #         model = self.model,
+        #         messages = [
+        #             {
+        #                 "role" : self.instruction_role,
+        #                 "content" : self.instruction
+        #             },
+        #             {
+        #                 "role" : self.user_role,
+        #                 "content" : text
+        #             }
+        #         ],
+        #         temperature = self.temperature,
+        #         max_tokens = self.max_tokens,
+        #         top_p = self.top_p
+        # )
+        # return response.choices[0].message.content
+        import random
+        sentiment_categories = ["Positive", "Negative", "Neutral"]
+        return random.choice(sentiment_categories)
 
 
 # Unit Testing

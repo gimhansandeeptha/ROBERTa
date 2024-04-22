@@ -80,25 +80,28 @@ class Handler:
         self._delete_excessive_data()
         self._load_data()
 
+        with open(self.metadata_path, 'r') as file:
+            data: dict = json.load(file)
+        checkpoint_path = data.get("latest",{}).get("path")
+
         if self.df is not None:
             finetuned_count = self._get_finetuned_count()
             if finetuned_count < 5:
                 finetune = FineTune()
-                finetune.finetune(self.df)
+                finetune.finetune(checkpoint_path,self.df)
                 self._update_finetuned_count(finetuned_count+1)
                 finetune.save_checkpoint(self.metadata_path)
             else:
                 validate = Validate()
-                validate.model_validate('insert actual checkpoint path', self.df)
-                validate.save_checkpoint(self.metadata_path)
-
+                validate.model_validate(checkpoint_path, self.df)
+                validate.save_checkpoint()
 
 class FineTune:
     def __init__(self) -> None:
         self.tuned_model = None 
         self.finetuned_obj = None
 
-    def finetune(self, df):
+    def finetune(self, checkpoint_path, df):
         if df is not None:
             ## Change the hyperparameter retreval
             data_handler = DataHandler(df,{"train_size":1.0, "test_size":0, "validation_size": 0.0})
@@ -111,7 +114,6 @@ class FineTune:
             finetune = RobertaFinetune(model=model,optimizer=optimizer,loss_function=loss_function)
             self.tuned_model = finetune.finetune(training_loader=train,validation_loader=val)
             self.finetuned_obj = finetune
-
             # Code to remove the data points used in the database goes here. 
         else:
             pass

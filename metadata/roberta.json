@@ -12,10 +12,10 @@
         "name": "roberta",
         "tokenizer": "RobertaTokenizer_1",
         "version": "1.0.0",
-        "trained_model_path": "models\\stable\\2024-04-09_12-15-46.pth",
-        "validation_loss": 1.0954169233640034
+        "trained_model_path": "models/stable/2024-04-22_07-46-31.pth",
+        "validation_loss": 1.0904473861058552
     },
     "data": {
-        "data_path": "ROBERTa\\data\\Software.json"
+        "data_path": "ROBERTa/data/Software.json"
     }
 }

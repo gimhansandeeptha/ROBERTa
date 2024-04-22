@@ -6,13 +6,17 @@ class Model():
     ''' Actual implementation to load the model. 
     '''
     def __init__(self) -> None:
-        self.model = None
+        self.model: torch.nn.Module = None
 
     def get_model(self,saved_model_path):
+        print(saved_model_path)
         ''' Returns the model in the indicated path.
         '''
-        loaded_model = torch.load(saved_model_path,map_location=torch.device('cpu'))   ### change 
-        self.model = loaded_model
+        model = RobertaClass() # This model can be changed to different model architecture. in roberta_models folder.
+        self.model = model
+        
+        loaded_model = torch.load(saved_model_path)   ### change 
+        self.model.load_state_dict(loaded_model.get("model_state_dict"))
         return self.model
     
     def get_model_tokenizer(self, tokenizer_name:str):
