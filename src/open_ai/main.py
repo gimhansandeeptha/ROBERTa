@@ -1,7 +1,7 @@
 ## The logic to fetch the data from GPT and store them to the database/delete data ans all that(gpt table)
 ## also delete data if want 
 from src.servicenow.data_object import SentimentData
-from src.finetune.open_ai.gpt import GPT
+from src.open_ai.gpt import GPT
 class APICall:
     def __init__(self) -> None:
         self.gpt = GPT()

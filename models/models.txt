@@ -1,4 +1,0 @@
-Trained model files (with bin extention) should be stored in this folder.
-The roberta model can be found here https://drive.google.com/file/d/1THWfUp8KABQrJAdXIMC_GOcb2e3px2AY/view?usp=sharing 
-All the model files can be found on https://drive.google.com/drive/folders/1-gJ3yXCMypo3zbSaOtbqvbNSx39POKrG?usp=sharing 
-you my need permission to access these links.

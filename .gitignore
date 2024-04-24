@@ -1,5 +1,6 @@
 # Ignore all files in the models directory
 models/*
+models_renamed/*
 
 # Except for the model.txt file inside the models directory
 !models/models.txt
