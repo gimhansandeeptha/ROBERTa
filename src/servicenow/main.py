@@ -2,7 +2,7 @@ from src.servicenow.comment_request import get_customer_comments
 from src.servicenow.query_param import get_query_param
 from src.servicenow.servicenow_access import service_now_authorize, service_now_refresh_token
 from src.servicenow.preprocess import extract_messages
-from src.servicenow.data_object import SentimentData
+from src.utils.data_model import ServicenowData
 # from .shared_data import SharedResource
 
 start = 0
@@ -14,7 +14,7 @@ class API():
         self.page_size = 5
         service_now_authorize() 
 
-    def get_comments(self, sentiment_data:SentimentData) -> SentimentData:
+    def get_comments(self, sn_data: ServicenowData) -> ServicenowData:
         processed_messages = []
         # shared_resource = SharedResource()
         while  self.start != "null":
@@ -25,6 +25,15 @@ class API():
             messages = extract_messages(response)
             processed_messages = processed_messages + messages
         # await shared_resource.set_data(processed_messages)
-        print(processed_messages)
-        sentiment_data.load_data(processed_messages)
-        # return sentiment_data
+        sn_data.load_data(processed_messages)
+        return sn_data
+
+
+# api = API()
+# sn_data = ServicenowData()
+# a=api.get_comments(sn_data)
+
+# sn_data.reset_params()
+# while sn_data.next_case():
+#     while sn_data.next_comment():
+#         print(sn_data.get_case_id(), sn_data.get_account(), sn_data.get_comment())

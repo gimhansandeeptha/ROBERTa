@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from src.servicenow.main import API
 import pickle
-
+from src.utils.data_model import ServicenowData
 # Changing the order of following two imports leads to an error (dependency conflict) #check
 from src.model.roberta import RobertaClass
 from src.inference.main import ModelPrediction
@@ -14,7 +14,6 @@ from src.database.main import Database
 from src.api.main import router
 from src.preprocess.main import DataCleaner
 from src.finetune.open_ai.main import APICall
-from src.servicenow.data_object import SentimentData
 
 # Replace the models file path in the models directory. 
 
@@ -53,10 +52,10 @@ def process():
 
     # ----------------------------- the following part should be uncommented in actual setting ------------------------
     api = API()
-    sentiment_data = SentimentData()
-    api.get_comments(sentiment_data)
+    sn_data = ServicenowData()
+    api.get_comments(sn_data)
 
-    data_cleaner = DataCleaner(sentiment_data)
+    data_cleaner = DataCleaner(sn_data)
     data_cleaner.clean()
 
     model_prediction = ModelPrediction()

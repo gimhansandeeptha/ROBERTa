@@ -6,6 +6,7 @@ from transformers import RobertaTokenizer
 import re
 from bs4 import BeautifulSoup
 from src.preprocess.roberta_Sentiment_data import RobertaSentimentData
+from src.utils.data_model import ServicenowData
 
 class DataHandler():
     def __init__(self,df:pd.DataFrame, split_dict:dict=None) -> None:
@@ -95,18 +96,17 @@ class DataHandler():
 
 
 class DataCleaner:
-    from src.servicenow.data_object import SentimentData
-    def __init__(self, sentiment_data: SentimentData) -> None:
-        self.cases = sentiment_data.cases
+    def __init__(self) -> None:
+        pass
 
-    def clean(self):
-        for case in self.cases:
-            for entry in case.get('entries'):
-                comment = entry.get('value')
+    def clean(self, sn_data: ServicenowData):
+        sn_data.reset_params()
+        while sn_data.next_case():
+            while sn_data.next_comment():
+                comment = sn_data.get_comment()
                 plain_text = self._html_to_text(comment)
                 normalized_text = self._normalize_texts(plain_text)
-                entry['value'] = normalized_text  # Replace the value (i.e. Comment) with the cleaned comment.
-        # return self.cases
+                sn_data.set_comment(normalized_text)
 
     def _normalize_texts(self, text):
         """Normalize one sentense 
@@ -131,6 +131,23 @@ class DataCleaner:
         # Remove extra whitespaces
         text = re.sub(r'\s+', ' ', text) 
         return text
+
+
+#### Testing
+# from src.servicenow.main import API
+# api = API()
+# sn_data = ServicenowData()
+# api.get_comments(sn_data)
+
+# data_cleaner = DataCleaner()
+# data_cleaner.clean(sn_data)
+
+# sn_data.reset_params()
+# while sn_data.next_case():
+#     while sn_data.next_comment():
+#         print(sn_data.get_case_id(), sn_data.get_account(), sn_data.get_comment())
+
+
 
 # def load_data():
 #     json_file_path = "data\\Software.json"

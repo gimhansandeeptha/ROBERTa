@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from src.database.connectdb import DatabaseConnection
 from src.database.createdb import CreateDB
-from src.servicenow.data_object import SentimentData
+from src.utils.data_model import ServicenowData
 
 environment_variable_file_path = ".\\src\\database\\.env"
 load_dotenv(environment_variable_file_path)
@@ -48,7 +48,7 @@ class Database():
             db.create_schema()
         return 
     
-    def insert_gpt_sentiment(self, sentiment_data: SentimentData):
+    def insert_gpt_sentiment(self, sn_data: ServicenowData):
         db=DatabaseConnection(hostname = self.hostname,
                               database = self.database_name,
                               username = self.username,
@@ -56,24 +56,18 @@ class Database():
                               )
         db.connect()
         try:
-            for case in sentiment_data.cases:
-                entries = case.get('entries')
-                for comment in entries:
-                    text = comment.get("value")
-                    sentiment = comment.get("gpt_sentiment", None)
-                    created_on = comment.get("created_on", datetime.now())
-                    insert_query = f"INSERT INTO gpt (text, sentiment, sys_created_on) VALUES ('{text}','{sentiment}','{created_on}')"
+            sn_data.reset_params()
+            while sn_data.next_case():
+                while sn_data.next_comment():
+                    text = sn_data.get_comment()
+                    gpt_sentiment = sn_data.get_gpt_sentiment()
+                    created_on = sn_data.get_date()
+                    insert_query = f"INSERT INTO gpt (text, sentiment, sys_created_on) VALUES ('{text}','{gpt_sentiment}','{created_on}')"
                     db.query(insert_query)
         finally:
             db.disconnect
 
-    
-    def insert_cases(self, sentiment_data:SentimentData):
-        ''' Value is assumed to be a list with the following format: Incorrect now 
-        value = [["case_id 01", "Account_name1",["comment 01","comment 02", ...],["sentiment 01","sentiment 2", ...]], 
-                 ["case_id 02", "Account_name2",["comment 01","comment 02", ...],["sentiment 01","sentiment 2", ...]],... 
-                ]
-        '''
+    def insert_cases(self, sn_data:ServicenowData):
         db=DatabaseConnection(hostname=hostname,
                               database=database,
                               username=username,
@@ -81,21 +75,19 @@ class Database():
                               )
         db.connect()
         try:
-            for case in sentiment_data.cases:
-                case_id = case.get('case_id')
-                account_name = case.get('account')
-                sys_created_on = case.get('sys_created_on',datetime.now())
-                entries = case.get('entries')
-
+            sn_data.reset_params()
+            while sn_data.next_case():
+                case_id = sn_data.get_case_id()
+                sys_created_on = sn_data.get_date()
+                account_name = sn_data.get_account()
                 insert_account = f"INSERT INTO account (case_id, sys_created_on, account_name) VALUES ('{case_id}','{sys_created_on}','{account_name}')"
                 db.query(insert_account)
-                # Insert into comment table
-                for entry in entries:
-                    comment = entry.get('value')
-                    sentiment = entry.get('sentiment')
+
+                while sn_data.next_comment():
+                    comment = sn_data.get_comment()
+                    sentiment = sn_data.get_sentiment()
                     insert_comment = f"INSERT INTO comment (id, comment, sentiment, account_case_id) VALUES (NULL, '{comment}', '{sentiment}', '{case_id}')"
                     db.query(insert_comment)
-            
         finally:
             db.disconnect
 
@@ -162,7 +154,6 @@ class Database():
             db.disconnect()
         return result
         
-
     def get_cases_by_date(self, start_date, end_date):
         result = ''
         query_by_date = f"""

@@ -1,5 +1,7 @@
 import pandas as pd 
 import numpy as np
+from datetime import datetime
+
 
 class DatabaseData:
     def __init__(self) -> None:
@@ -53,7 +55,7 @@ class DatabaseData:
             return None
 
 class ServicenowData:
-    def __init__(self, data:list[dict]) -> None:
+    def load_data(self, data:list[dict]) -> None:
         self.data = data
         self.length = len(data)
         self.reset_params()
@@ -88,7 +90,7 @@ class ServicenowData:
             return False
         
     def get_case_id(self):
-        case_id = self.current_case.get("display_value")
+        case_id = self.current_case.get("case_id")
         return case_id
     
     def get_account(self):
@@ -96,7 +98,7 @@ class ServicenowData:
         return account
     
     def get_date(self):
-        sys_created = self.current_case.get("sys_created_on")
+        sys_created = self.current_case.get("sys_created_on", datetime.now())
         return sys_created
     
     def get_case(self):
