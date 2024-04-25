@@ -1,6 +1,6 @@
 ## The logic to fetch the data from GPT and store them to the database/delete data ans all that(gpt table)
 ## also delete data if want 
-from src.servicenow.data_object import SentimentData
+from src.utils.data_model import ServicenowData
 from src.open_ai.gpt import GPT
 class APICall:
     def __init__(self) -> None:
@@ -9,11 +9,11 @@ class APICall:
     async def _get_one_sentiment(self,comment):
         return await self.gpt.get_response(comment)
 
-    async def get_sentiments(self, sentiment_data: SentimentData):
-        for case in sentiment_data.cases:
-            for entry in case.get('entries'):
-                comment = entry.get('value')
+    async def set_gpt_sentiments(self, sn_data: ServicenowData):
+        sn_data.reset_params()
+        while sn_data.next_case():
+            while sn_data.next_comment():
+                comment = sn_data.get_comment()
                 sentiment = await self._get_one_sentiment(comment)
-                async with sentiment_data.lock:
-                    entry['gpt_sentiment'] = sentiment
+                sn_data.set_gpt_sentiment(sentiment)
 

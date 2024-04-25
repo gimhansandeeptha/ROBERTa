@@ -5,15 +5,15 @@ from contextlib import asynccontextmanager
 import uvicorn
 from src.servicenow.main import API
 import pickle
-from src.utils.data_model import ServicenowData
+from src.utils.data_model import ServicenowData, DatabaseData
 # Changing the order of following two imports leads to an error (dependency conflict) #check
 from src.model.roberta import RobertaClass
-from src.inference.main import ModelPrediction
+from src.model.main import ModelProcess
 from src.model.app import App
 from src.database.main import Database
 from src.api.main import router
 from src.preprocess.main import DataCleaner
-from src.finetune.open_ai.main import APICall
+from src.open_ai.main import APICall
 
 # Replace the models file path in the models directory. 
 
@@ -58,28 +58,32 @@ def process():
     data_cleaner = DataCleaner(sn_data)
     data_cleaner.clean()
 
-    model_prediction = ModelPrediction()
+    model_process= ModelProcess()
+    model_process.inference_process(sn_data)
+
     api_call = APICall()
-    model_prediction.get_sentiments(sentiment_data)
-    loop = asyncio.new_event_loop()
-    task1 = loop.create_task(model_prediction.get_sentiments(sentiment_data))
-    task2 = loop.create_task(api_call.get_sentiments(sentiment_data))
+    api_call.set_gpt_sentiments(sn_data)
+    # loop = asyncio.new_event_loop()
+    # task1 = loop.create_task(model_prediction.get_sentiments(sentiment_data))
+    # task2 = loop.create_task(api_call.get_sentiments(sentiment_data))
 
     # # Wait for both tasks to complete
-    loop.run_until_complete(asyncio.gather(task2, task1))
+    # loop.run_until_complete(asyncio.gather(task2, task1))
     # -------------------------------------------------------------------------------------------------------------------
 
     database = Database()
-    database.insert_cases(sentiment_data)
+    database.insert_cases(sn_data)
 
     # Insert GPT sentiments to the database
-    database.insert_gpt_sentiment(sentiment_data)
+    database.insert_gpt_sentiment(sn_data)
 
-from src.finetune.main import Handler
+# from src.finetune.main import Handler
 
 def finetune():
-    finetune_handler = Handler()
-    finetune_handler.finetune()
+    # finetune_handler = Handler()
+    # finetune_handler.finetune()
+    model_process = ModelProcess()
+    model_process.finetune_process(DatabaseData())
 
 app=FastAPI(lifespan=lifespan)
 app.include_router(router)

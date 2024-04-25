@@ -1,15 +1,14 @@
 import pandas as pd 
 import numpy as np
 from datetime import datetime
-
+from src.utils.data_model import ServicenowData
 
 class DatabaseData:
     def __init__(self) -> None:
         self.data: pd.DataFrame = None
         self.iter_index = 0
 
-    def load_data(self, json_response: list): 
-        # Data loading logic
+    def load_data(self, data: ServicenowData): 
         pass
 
     def load_test_data(self, df):
