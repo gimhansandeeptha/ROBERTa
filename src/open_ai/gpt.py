@@ -14,23 +14,26 @@ class GPT:
         self.top_p = 1
 
     async def get_response(self, text:str):
-        response = self.client.chat.completions.create(
-                model = self.model,
-                messages = [
-                    {
-                        "role" : self.instruction_role,
-                        "content" : self.instruction
-                    },
-                    {
-                        "role" : self.user_role,
-                        "content" : text
-                    }
-                ],
-                temperature = self.temperature,
-                max_tokens = self.max_tokens,
-                top_p = self.top_p
-        )
-        return response.choices[0].message.content
+        # response = self.client.chat.completions.create(
+        #         model = self.model,
+        #         messages = [
+        #             {
+        #                 "role" : self.instruction_role,
+        #                 "content" : self.instruction
+        #             },
+        #             {
+        #                 "role" : self.user_role,
+        #                 "content" : text
+        #             }
+        #         ],
+        #         temperature = self.temperature,
+        #         max_tokens = self.max_tokens,
+        #         top_p = self.top_p
+        # )
+        # return response.choices[0].message.content
+        import random
+        sentiments = ['Negative', 'Positive', 'Neutral']
+        return random.choice(sentiments)
 
 
 # Unit Testing

@@ -7,9 +7,9 @@ from src.servicenow.main import API
 import pickle
 from src.utils.data_model import ServicenowData, DatabaseData
 # Changing the order of following two imports leads to an error (dependency conflict) #check
-from src.model.roberta import RobertaClass
+
 from src.model.main import ModelProcess
-from src.model.app import App
+
 from src.database.main import Database
 from src.api.main import router
 from src.preprocess.main import DataCleaner
@@ -30,7 +30,7 @@ async def lifespan(lifespan):
     second = time.second
     # --------------------------------------------------------------------
 
-    schedular.add_job(func=process, trigger="cron", hour=hour, minute=minute, second=second)
+    # schedular.add_job(func=process, trigger="cron", hour=hour, minute=minute, second=second)
     schedular.add_job(func=finetune, trigger="cron", hour=hour, minute=minute, second=second)
     schedular.start()
     yield
@@ -55,14 +55,17 @@ def process():
     sn_data = ServicenowData()
     api.get_comments(sn_data)
 
-    data_cleaner = DataCleaner(sn_data)
-    data_cleaner.clean()
+    data_cleaner = DataCleaner()
+    data_cleaner.clean(sn_data)
 
     model_process= ModelProcess()
-    model_process.inference_process(sn_data)
-
     api_call = APICall()
-    api_call.set_gpt_sentiments(sn_data)
+
+    loop = asyncio.new_event_loop()
+    inference_task = loop.create_task(model_process.inference_process(sn_data))
+    gpt_prediction_task = loop.create_task(api_call.set_gpt_sentiments(sn_data))
+    loop.run_until_complete(asyncio.gather(inference_task, gpt_prediction_task))
+
     # loop = asyncio.new_event_loop()
     # task1 = loop.create_task(model_prediction.get_sentiments(sentiment_data))
     # task2 = loop.create_task(api_call.get_sentiments(sentiment_data))
@@ -80,10 +83,12 @@ def process():
 # from src.finetune.main import Handler
 
 def finetune():
-    # finetune_handler = Handler()
-    # finetune_handler.finetune()
+    database = Database()
+    gpt_entries = database.get_gpt_entries(count=10) # Use large value e.g. 500
+    print(gpt_entries.head(20))
+
     model_process = ModelProcess()
-    model_process.finetune_process(DatabaseData())
+    model_process.finetune_process(gpt_entries)
 
 app=FastAPI(lifespan=lifespan)
 app.include_router(router)

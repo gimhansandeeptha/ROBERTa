@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import pandas as pd
 from src.model.models.model import Model
 from src.model.models.roberta_model import RobertaModel
 from src.utils.metadata import Metadata
@@ -38,9 +39,10 @@ class ModelProcess:
         sentiments = df['sentiment'].to_numpy()
         return texts, sentiments
 
-    def finetune_process(self, data:DatabaseData):
-        text = data.get_column("text")
-        sentiment = data.get_column("gpt_sentiment")
+    def finetune_process(self, df:pd.DataFrame):
+        print(df.columns.to_list())
+        text = df['text'].values
+        sentiment = df["gpt_sentiment"].values
 
         sentiment_converter = RobertaSentimentConverter()
         sentiment_number = sentiment_converter.sentiment_to_num(sentiment)

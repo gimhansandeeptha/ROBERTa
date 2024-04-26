@@ -1,14 +1,13 @@
 import pandas as pd 
 import numpy as np
 from datetime import datetime
-from src.utils.data_model import ServicenowData
 
 class DatabaseData:
     def __init__(self) -> None:
         self.data: pd.DataFrame = None
         self.iter_index = 0
 
-    def load_data(self, data: ServicenowData): 
+    def load_data(self, data): 
         pass
 
     def load_test_data(self, df):
@@ -107,11 +106,11 @@ class ServicenowData:
         return self.comment
     
     def get_sentiment(self):
-        sentiment = self.entries[self.comment_no].get("sentiment", None)
+        sentiment = self.entries[self.comment_no].get("sentiment", "")
         return sentiment
     
     def get_gpt_sentiment(self):
-        gpt_sentiment = self.entries[self.comment_no].get("gpt_sentiment",None)
+        gpt_sentiment = self.entries[self.comment_no].get("gpt_sentiment","")
         return gpt_sentiment
     
     def set_comment(self, comment:str):

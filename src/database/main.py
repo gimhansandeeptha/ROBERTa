@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+import pandas as pd
 from datetime import datetime
 from src.database.connectdb import DatabaseConnection
 from src.database.createdb import CreateDB
@@ -119,29 +120,28 @@ class Database():
         finally:
             db.disconnect()
 
-    def get_gpt_entries(self, count):
+    def get_gpt_entries(self, count) -> pd.DataFrame: 
         result = None
-        query = f"""
-                WITH RankedData AS (
-                SELECT
-                    id,
-                    text,
-                    sentiment,
-                    sys_created_on,
-                    ROW_NUMBER() OVER (PARTITION BY sentiment ORDER BY sys_created_on DESC) AS rn
-                FROM
-                    gpt
+        df = None
+        query = f"""WITH RankedData AS (
+                    SELECT
+                        id,
+                        text,
+                        sentiment,
+                        sys_created_on,
+                        ROW_NUMBER() OVER (PARTITION BY sentiment ORDER BY sys_created_on DESC) AS rn
+                    FROM
+                        gpt
                 )
-                SELECT
-                    id,
-                    text,
-                    sentiment,
-                    sys_created_on
-                FROM
-                    RankedData
-                WHERE
-                    rn <= {count};
-                """
+                SELECT id, text, sentiment, sys_created_on
+                FROM (
+                    SELECT id, text, sentiment, sys_created_on,
+                        ROW_NUMBER() OVER (PARTITION BY sentiment ORDER BY sys_created_on DESC) AS rn
+                    FROM RankedData
+                    WHERE sentiment IN ('Positive', 'Negative', 'Neutral')
+                ) AS CombinedData
+                WHERE rn <= {count};
+            """
         db=DatabaseConnection(hostname=hostname,
                               database=database,
                               username=username,
@@ -152,9 +152,12 @@ class Database():
             result = db.query(query)
         finally:
             db.disconnect()
-        return result
+        if result is not None:
+            df = pd.DataFrame(result, columns=['id','text', 'gpt_sentiment', 'datetime']) 
+            df.dropna(inplace=True) 
+        return df
         
-    def get_cases_by_date(self, start_date, end_date):
+    def get_cases_by_date(self, start_date, end_date) -> pd.DataFrame:
         result = ''
         query_by_date = f"""
                             SELECT 
