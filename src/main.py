@@ -11,6 +11,7 @@ from src.utils.data_model import ServicenowData, DatabaseData
 from src.model.main import ModelProcess
 
 from src.database.main import Database
+from src.database.roberta_db import RobertaDB
 from src.api.main import router
 from src.preprocess.main import DataCleaner
 from src.open_ai.main import APICall
@@ -74,7 +75,7 @@ def process():
     # loop.run_until_complete(asyncio.gather(task2, task1))
     # -------------------------------------------------------------------------------------------------------------------
 
-    database = Database()
+    database = RobertaDB()
     database.insert_cases(sn_data)
 
     # Insert GPT sentiments to the database
@@ -83,8 +84,8 @@ def process():
 # from src.finetune.main import Handler
 
 def finetune():
-    database = Database()
-    gpt_entries = database.get_gpt_entries(count=10) # Use large value e.g. 500
+    database = RobertaDB()
+    gpt_entries = database.get_gpt_entries()
     print(gpt_entries.head(30))
 
     model_process = ModelProcess()

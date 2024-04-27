@@ -19,9 +19,6 @@ class ModelProcess:
         self.finetune_metadata_filepath = "models/finetune_checkpoint/metadata/roberta_metadata.json"
         self.stable_metadata_filepath = "models/stable_checkpoint/metadata/initial_metadata.json"
         self.max_finetuned_count = 5
-    
-    def save(self, folder):
-        pass
 
     def train(self):
         pass
@@ -40,55 +37,50 @@ class ModelProcess:
                 sentiment = model_creator.infer(text)
                 sn_data.set_sentiment(sentiment)
 
-    # def _preprocess(self, data:DatabaseData):
-    #     df = data.get_data()
-    #     texts = df['text'].to_numpy()
-    #     sentiments = df['sentiment'].to_numpy()
-    #     return texts, sentiments
-
     def finetune_process(self, df:pd.DataFrame):
-        texts = df['text'].values
-        sentiment = df["gpt_sentiment"].values
+        if df is not None:
+            texts = df['text'].values
+            sentiment = df["gpt_sentiment"].values
 
-        sentiment_converter = RobertaSentimentConverter()
-        sentiment_number = sentiment_converter.sentiment_to_num(sentiment)
+            sentiment_converter = RobertaSentimentConverter()
+            sentiment_number = sentiment_converter.sentiment_to_num(sentiment)
 
-        metadata = Metadata(self.finetune_metadata_filepath)
-        checkpoint_path = metadata.get_value(['latest','path'])
-        finetuned_count = metadata.get_value(['latest','finetune_count'])
-        chekpoint_save_folder = metadata.get_value(['latest', 'checkpoint_save_folder'])
+            metadata = Metadata(self.finetune_metadata_filepath)
+            checkpoint_path = metadata.get_value(['latest','path'])
+            finetuned_count = metadata.get_value(['latest','finetune_count'])
+            chekpoint_save_folder = metadata.get_value(['latest', 'checkpoint_save_folder'])
 
-        model_creator = RobertaModel()
-        model_creator.create()
-        model_creator.load(checkpoint_path)
+            model_creator = RobertaModel()
+            model_creator.create()
+            model_creator.load(checkpoint_path)
 
-        if finetuned_count < self.max_finetuned_count:
-            model_creator.finetune(texts, sentiment_number)
-            current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            new_checkpoint_path = os.path.join(chekpoint_save_folder, f"{current_datetime}.pth")
-            model_creator.save(new_checkpoint_path)
-            metadata.set_value(['latest','finetune_count'], finetuned_count+1)
-            metadata.set_value(['latest','path'],new_checkpoint_path)
-            os.remove(checkpoint_path)    
-            
+            if finetuned_count < self.max_finetuned_count:
+                model_creator.finetune(texts, sentiment_number)
+                current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                new_checkpoint_path = os.path.join(chekpoint_save_folder, f"{current_datetime}.pth")
+                model_creator.save(new_checkpoint_path)
+                metadata.set_value(['latest','finetune_count'], finetuned_count+1)
+                metadata.set_value(['latest','path'],new_checkpoint_path)
+                os.remove(checkpoint_path)                   
+            else:
+                checkpoint_validation_loss = model_creator.validate(texts, sentiment_number)
+
+                stable_metadata = Metadata(self.stable_metadata_filepath)
+                stable_model_path = stable_metadata.get_value(['path'])
+                stable_save_folder = stable_metadata.get_value(['stable_save_folder'])
+                current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                new_model_path = os.path.join(stable_save_folder, f"{current_datetime}.pth")
+                stable_validation_loss = float(stable_metadata.get_value(['validation_loss']))
+
+                if checkpoint_validation_loss < stable_validation_loss:
+                    model_creator.save(new_model_path)
+                    os.remove(stable_model_path)
+                    stable_metadata.set_value(['validation_loss'], checkpoint_validation_loss)
+                    stable_metadata.set_value(['path'],new_model_path)
+
+                metadata.set_value(['latest','finetune_count'], 0)
         else:
-            checkpoint_validation_loss = model_creator.validate(texts, sentiment_number)
-
-            stable_metadata = Metadata(self.stable_metadata_filepath)
-            stable_model_path = stable_metadata.get_value(['path'])
-            stable_save_folder = stable_metadata.get_value(['stable_save_folder'])
-            current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            new_model_path = os.path.join(stable_save_folder, f"{current_datetime}.pth")
-            stable_validation_loss = float(stable_metadata.get_value(['validation_loss']))
-
-            if checkpoint_validation_loss < stable_validation_loss:
-                model_creator.save(new_model_path)
-                os.remove(stable_model_path)
-                stable_metadata.set_value(['validation_loss'], checkpoint_validation_loss)
-                stable_metadata.set_value(['path'],new_model_path)
-
-            metadata.set_value(['latest','finetune_count'], 0)
-
+            print("Finetuning conditions are not satisfied.")
 
 # data = [
 #             {

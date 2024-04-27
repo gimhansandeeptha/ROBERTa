@@ -49,26 +49,20 @@ class Database():
             db.create_schema()
         return 
     
-    def insert_gpt_sentiment(self, sn_data: ServicenowData):
+    def insert_gpt_sentiment(self, text, gpt_sentiment, created_on):
         db=DatabaseConnection(hostname = self.hostname,
                               database = self.database_name,
                               username = self.username,
                               password = self.password
                               )
         db.connect()
-        try:
-            sn_data.reset_params()
-            while sn_data.next_case():
-                while sn_data.next_comment():
-                    text = sn_data.get_comment()
-                    gpt_sentiment = sn_data.get_gpt_sentiment()
-                    created_on = sn_data.get_date()
-                    insert_query = f"INSERT INTO gpt (text, sentiment, sys_created_on) VALUES ('{text}','{gpt_sentiment}','{created_on}')"
-                    db.query(insert_query)
+        try: 
+            insert_query = f"INSERT INTO gpt (text, sentiment, sys_created_on) VALUES ('{text}','{gpt_sentiment}','{created_on}')"
+            db.query(insert_query)
         finally:
             db.disconnect
 
-    def insert_cases(self, sn_data:ServicenowData):
+    def insert_cases(self, case_id, sys_created_on, account_name, comment,sentiment):
         db=DatabaseConnection(hostname=hostname,
                               database=database,
                               username=username,
@@ -76,21 +70,28 @@ class Database():
                               )
         db.connect()
         try:
-            sn_data.reset_params()
-            while sn_data.next_case():
-                case_id = sn_data.get_case_id()
-                sys_created_on = sn_data.get_date()
-                account_name = sn_data.get_account()
-                insert_account = f"INSERT INTO account (case_id, sys_created_on, account_name) VALUES ('{case_id}','{sys_created_on}','{account_name}')"
-                db.query(insert_account)
+            insert_account = f"INSERT INTO account (case_id, sys_created_on, account_name) VALUES ('{case_id}','{sys_created_on}','{account_name}')"
+            db.query(insert_account)
 
-                while sn_data.next_comment():
-                    comment = sn_data.get_comment()
-                    sentiment = sn_data.get_sentiment()
-                    insert_comment = f"INSERT INTO comment (id, comment, sentiment, account_case_id) VALUES (NULL, '{comment}', '{sentiment}', '{case_id}')"
-                    db.query(insert_comment)
+            insert_comment = f"INSERT INTO comment (id, comment, sentiment, account_case_id) VALUES (NULL, '{comment}', '{sentiment}', '{case_id}')"
+            db.query(insert_comment)
         finally:
             db.disconnect
+    
+    def delete_gpt_entry(self, id):
+        db=DatabaseConnection(hostname=hostname,
+                              database=database,
+                              username=username,
+                              password=password
+                              )
+        db.connect()
+        try:
+            query_gpt=f"""DELETE FROM gpt
+                        WHERE id = {id};"""
+            db.query(query_gpt)
+        finally:
+            db.disconnect()
+
 
     def delete_all_gpt_entries(self):
         db=DatabaseConnection(hostname=hostname,
@@ -120,9 +121,8 @@ class Database():
         finally:
             db.disconnect()
 
-    def get_gpt_entries(self, count) -> pd.DataFrame: 
+    def get_gpt_entries(self, count): 
         result = None
-        df = None
         query = f"""WITH RankedData AS (
                     SELECT
                         id,
@@ -151,11 +151,8 @@ class Database():
         try:
             result = db.query(query)
         finally:
-            db.disconnect()
-        if result is not None:
-            df = pd.DataFrame(result, columns=['id','text', 'gpt_sentiment', 'datetime']) 
-            df.dropna(inplace=True) 
-        return df
+            db.disconnect() 
+        return result
         
     def get_cases_by_date(self, start_date, end_date) -> pd.DataFrame:
         result = ''
