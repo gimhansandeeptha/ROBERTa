@@ -59,7 +59,7 @@ class ServicenowData:
         self.reset_params()
 
     def reset_params(self):
-        "After iterating on cases this should call to re-do the iterations may be in another function"
+        "Call this function before iterating through the data"
         self.case_no=-1
         self.comment_no= -1
         self.current_case:dict = None

@@ -38,10 +38,10 @@ class RobertaTrainSentimentData(RobertaSentimentData):
     Custom class for handling sentiment data. To be able to pass to the DataLoader.
     __getitem__ function do the tokenization for each text sample.
     '''
-    def __init__(self, x, y, tokenizer, max_len):
+    def __init__(self, text, targets, tokenizer, max_len):
         self.tokenizer = tokenizer
-        self.text = x
-        self.targets = y
+        self.text = text
+        self.targets = targets
         self.max_len = max_len
 
     def __len__(self):

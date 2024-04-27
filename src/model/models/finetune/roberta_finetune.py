@@ -41,6 +41,5 @@ class RobertaFinetune():
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
-
         return self.model
     

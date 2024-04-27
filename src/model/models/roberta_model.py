@@ -23,7 +23,7 @@ class RobertaModel(Model):
         self.finetune_batch_size = 32
     
     def create(self):
-        model = RobertaClass() # This model can be changed to different model architecture. in roberta_models folder.
+        model = RobertaClass()
         self.model = model
 
         tokenizer = RobertaTokenizer.from_pretrained('roberta-base', truncation=True, do_lower_case=True)
@@ -35,9 +35,13 @@ class RobertaModel(Model):
         LEARNING_RATE = 1e-05
         optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
         self.optimizer = optimizer
+
+        self.max_len = 256
+        self.device = "cpu"
+        self.finetune_batch_size = 32
     
-    def load(self, file_path):
-        checkpoint: dict=torch.load(file_path)
+    def load(self, checkpoint_path):
+        checkpoint: dict=torch.load(checkpoint_path)
         model_state_dict = checkpoint.get("model_state_dict")
         optimizer_state_dict = checkpoint.get("optimizer_state_dict", self.optimizer.state_dict())
         self.model.load_state_dict(model_state_dict)
@@ -54,7 +58,7 @@ class RobertaModel(Model):
                         }
         finetune_loader = DataLoader(finetune_data, **train_params)
         finetune = RobertaFinetune(self.model, self.optimizer, self.loss_function)
-        self.model = finetune.finetune(finetune_loader)
+        self.model = finetune.finetune(finetune_loader,self.device)
 
     def validate(self, texts: np.array, sentiments: np.array) -> float:
         validate_data = RobertaTrainSentimentData(texts, sentiments, self.tokenizer, self.max_len)
@@ -64,7 +68,7 @@ class RobertaModel(Model):
                         }
         validation_loader = DataLoader(validate_data, **validate_params) 
         validate = RobertaValidate(self.model, self.loss_function)
-        validation_loss = validate.validate(validation_loader)
+        validation_loss = validate.validate(validation_loader, self.device)
         return validation_loss
     
     def infer(self, text: str):

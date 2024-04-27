@@ -85,7 +85,7 @@ def process():
 def finetune():
     database = Database()
     gpt_entries = database.get_gpt_entries(count=10) # Use large value e.g. 500
-    print(gpt_entries.head(20))
+    print(gpt_entries.head(30))
 
     model_process = ModelProcess()
     model_process.finetune_process(gpt_entries)

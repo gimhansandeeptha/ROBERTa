@@ -10,6 +10,11 @@ from src.model.preprocess.roberta_sentiment_converter import RobertaSentimentCon
 
 class ModelProcess:
     def __init__(self) -> None:
+        """ max_finetuned_count: Number of finetuning iterations before the validation phase. 
+                                Do not confuse this with the epochs for a perticular finetuninig.
+            finetune_metadata_filepath: Metadata file path for partially finetuned models.
+            stable_metadata_filepath: Metadata file for stable model(inferencing model)
+        """
         self.model_creator: Model = None
         self.finetune_metadata_filepath = "models/finetune_checkpoint/metadata/roberta_metadata.json"
         self.stable_metadata_filepath = "models/stable_checkpoint/metadata/initial_metadata.json"
@@ -27,21 +32,22 @@ class ModelProcess:
         model_creator = RobertaModel()
         model_creator.create()
         model_creator.load(model_path)
+
+        sn_data.reset_params()
         while sn_data.next_case():
             while sn_data.next_comment():
                 text = sn_data.get_comment()
                 sentiment = model_creator.infer(text)
                 sn_data.set_sentiment(sentiment)
 
-    def _preprocess(self, data:DatabaseData):
-        df = data.get_data()
-        texts = df['text'].to_numpy()
-        sentiments = df['sentiment'].to_numpy()
-        return texts, sentiments
+    # def _preprocess(self, data:DatabaseData):
+    #     df = data.get_data()
+    #     texts = df['text'].to_numpy()
+    #     sentiments = df['sentiment'].to_numpy()
+    #     return texts, sentiments
 
     def finetune_process(self, df:pd.DataFrame):
-        print(df.columns.to_list())
-        text = df['text'].values
+        texts = df['text'].values
         sentiment = df["gpt_sentiment"].values
 
         sentiment_converter = RobertaSentimentConverter()
@@ -56,8 +62,8 @@ class ModelProcess:
         model_creator.create()
         model_creator.load(checkpoint_path)
 
-        if finetuned_count > self.max_finetuned_count:
-            model_creator.finetune(text, sentiment_number)
+        if finetuned_count < self.max_finetuned_count:
+            model_creator.finetune(texts, sentiment_number)
             current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             new_checkpoint_path = os.path.join(chekpoint_save_folder, f"{current_datetime}.pth")
             model_creator.save(new_checkpoint_path)
@@ -66,7 +72,7 @@ class ModelProcess:
             os.remove(checkpoint_path)    
             
         else:
-            checkpoint_validation_loss = model_creator.validate(text, sentiment_number)
+            checkpoint_validation_loss = model_creator.validate(texts, sentiment_number)
 
             stable_metadata = Metadata(self.stable_metadata_filepath)
             stable_model_path = stable_metadata.get_value(['path'])
