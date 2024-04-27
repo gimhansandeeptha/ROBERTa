@@ -62,7 +62,7 @@ class Database():
         finally:
             db.disconnect
 
-    def insert_cases(self, case_id, sys_created_on, account_name, comment,sentiment):
+    def insert_case(self, case_id, sys_created_on, account_name):
         db=DatabaseConnection(hostname=hostname,
                               database=database,
                               username=username,
@@ -72,7 +72,17 @@ class Database():
         try:
             insert_account = f"INSERT INTO account (case_id, sys_created_on, account_name) VALUES ('{case_id}','{sys_created_on}','{account_name}')"
             db.query(insert_account)
-
+        finally:
+            db.disconnect
+    
+    def insert_case_comment(self, comment, sentiment, case_id):
+        db=DatabaseConnection(hostname=hostname,
+                              database=database,
+                              username=username,
+                              password=password
+                              )
+        db.connect()
+        try:
             insert_comment = f"INSERT INTO comment (id, comment, sentiment, account_case_id) VALUES (NULL, '{comment}', '{sentiment}', '{case_id}')"
             db.query(insert_comment)
         finally:

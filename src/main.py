@@ -31,8 +31,8 @@ async def lifespan(lifespan):
     second = time.second
     # --------------------------------------------------------------------
 
-    # schedular.add_job(func=process, trigger="cron", hour=hour, minute=minute, second=second)
-    schedular.add_job(func=finetune, trigger="cron", hour=hour, minute=minute, second=second)
+    schedular.add_job(func=process, trigger="cron", hour=hour, minute=minute, second=second)
+    # schedular.add_job(func=finetune, trigger="cron", hour=hour, minute=minute, second=second)
     schedular.start()
     yield
     print("app stopped...")
@@ -62,10 +62,8 @@ def process():
     model_process= ModelProcess()
     api_call = APICall()
 
-    loop = asyncio.new_event_loop()
-    inference_task = loop.create_task(model_process.inference_process(sn_data))
-    gpt_prediction_task = loop.create_task(api_call.set_gpt_sentiments(sn_data))
-    loop.run_until_complete(asyncio.gather(inference_task, gpt_prediction_task))
+    model_process.inference_process(sn_data)
+    api_call.set_gpt_sentiments(sn_data)
 
     # loop = asyncio.new_event_loop()
     # task1 = loop.create_task(model_prediction.get_sentiments(sentiment_data))

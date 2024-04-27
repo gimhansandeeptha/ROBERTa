@@ -9,7 +9,7 @@ from src.model.preprocess.roberta_dataloader import RobertaTrainSentimentData
 from src.model.preprocess.roberta_sentiment_converter import RobertaSentimentConverter
 
 class ModelProcess:
-    def __init__(self) -> None:
+    def __init__(self):
         """ max_finetuned_count: Number of finetuning iterations before the validation phase. 
                                 Do not confuse this with the epochs for a perticular finetuninig.
             finetune_metadata_filepath: Metadata file path for partially finetuned models.

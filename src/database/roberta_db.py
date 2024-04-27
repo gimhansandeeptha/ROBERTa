@@ -15,11 +15,12 @@ class RobertaDB:
             case_id = sn_data.get_case_id()
             sys_created_on = sn_data.get_date()
             account_name = sn_data.get_account()
+            self.database.insert_case(case_id, sys_created_on, account_name)
             while sn_data.next_comment():
                 comment = sn_data.get_comment()
                 sentiment = sn_data.get_sentiment()
-                self.database.insert_cases(case_id, sys_created_on, account_name, comment, sentiment)
-        
+                self.database.insert_case_comment(comment, sentiment, case_id)
+                   
         # Delete excessive data in the database.
 
     def get_gpt_entries(self) -> pd.DataFrame:
