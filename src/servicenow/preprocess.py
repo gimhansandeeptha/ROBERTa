@@ -10,6 +10,9 @@ def extract_messages(response):
         data = response.json()
     except ValueError:
         raise ValueError("The object cannot be parsed")
+    except RecursionError:
+        raise RecursionError("""Servicenow is giving an error response,'maximum recursion depth exceeded while decoding a JSON object' 
+                             Please check the response from the servicenow api call""")
 
     cases = data['result']['cases']
     extracted_cases =[]

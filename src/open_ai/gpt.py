@@ -13,7 +13,7 @@ class GPT:
         self.max_tokens = 64
         self.top_p = 1
 
-    async def get_response(self, text:str):
+    def get_response(self, text:str):
         # response = self.client.chat.completions.create(
         #         model = self.model,
         #         messages = [

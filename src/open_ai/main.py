@@ -6,14 +6,14 @@ class APICall:
     def __init__(self) -> None:
         self.gpt = GPT()
 
-    async def _get_one_sentiment(self,comment):
-        return await self.gpt.get_response(comment)
+    def _get_one_sentiment(self,comment):
+        return self.gpt.get_response(comment)
 
-    async def set_gpt_sentiments(self, sn_data: ServicenowData):
+    def set_gpt_sentiments(self, sn_data: ServicenowData):
         sn_data.reset_params()
         while sn_data.next_case():
             while sn_data.next_comment():
                 comment = sn_data.get_comment()
-                sentiment = await self._get_one_sentiment(comment)
+                sentiment = self._get_one_sentiment(comment)
                 sn_data.set_gpt_sentiment(sentiment)
 

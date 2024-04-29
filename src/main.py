@@ -4,19 +4,15 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from contextlib import asynccontextmanager
 import uvicorn
 from src.servicenow.main import API
-import pickle
 from src.utils.data_model import ServicenowData, DatabaseData
 # Changing the order of following two imports leads to an error (dependency conflict) #check
 
 from src.model.main import ModelProcess
-
 from src.database.main import Database
 from src.database.roberta_db import RobertaDB
 from src.api.main import router
 from src.preprocess.main import DataCleaner
 from src.open_ai.main import APICall
-
-# Replace the models file path in the models directory. 
 
 @asynccontextmanager
 async def lifespan(lifespan):
@@ -32,7 +28,7 @@ async def lifespan(lifespan):
     # --------------------------------------------------------------------
 
     schedular.add_job(func=process, trigger="cron", hour=hour, minute=minute, second=second)
-    # schedular.add_job(func=finetune, trigger="cron", hour=hour, minute=minute, second=second)
+    schedular.add_job(func=finetune, trigger="cron", hour=hour, minute=minute+3, second=second)
     schedular.start()
     yield
     print("app stopped...")
@@ -61,31 +57,16 @@ def process():
 
     model_process= ModelProcess()
     api_call = APICall()
-
     model_process.inference_process(sn_data)
     api_call.set_gpt_sentiments(sn_data)
 
-    # loop = asyncio.new_event_loop()
-    # task1 = loop.create_task(model_prediction.get_sentiments(sentiment_data))
-    # task2 = loop.create_task(api_call.get_sentiments(sentiment_data))
-
-    # # Wait for both tasks to complete
-    # loop.run_until_complete(asyncio.gather(task2, task1))
-    # -------------------------------------------------------------------------------------------------------------------
-
     database = RobertaDB()
-    database.insert_cases(sn_data)
-
-    # Insert GPT sentiments to the database
-    database.insert_gpt_sentiment(sn_data)
-
-# from src.finetune.main import Handler
+    database.insert_cases(sn_data)  # Insert Cases to the database.
+    database.insert_gpt_sentiment(sn_data)  # Insert GPT sentiments to the database.
 
 def finetune():
     database = RobertaDB()
     gpt_entries = database.get_gpt_entries()
-    print(gpt_entries.head(30))
-
     model_process = ModelProcess()
     model_process.finetune_process(gpt_entries)
 

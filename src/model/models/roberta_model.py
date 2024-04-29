@@ -47,9 +47,6 @@ class RobertaModel(Model):
         self.model.load_state_dict(model_state_dict)
         self.optimizer.load_state_dict(optimizer_state_dict)
 
-    def train(self, train_loader):
-        pass
-    
     def finetune(self, texts: np.array, sentiments: np.array):
         finetune_data = RobertaTrainSentimentData(texts, sentiments, self.tokenizer, self.max_len)
         train_params = {'batch_size': self.finetune_batch_size,

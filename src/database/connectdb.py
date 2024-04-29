@@ -39,12 +39,12 @@ class DatabaseConnection:
                 self.connection.close()
         except mysql.connector.Error as err:
             print("Error disconnecting from database:", err)
-        
-    
+            
     def query(self, query):
         ''' Query the database.
             Return the list consist of quary output.
         ''' 
+        result = []
         try:
             self.cursor = self.connection.cursor()
             self.cursor.execute(query)
@@ -78,5 +78,4 @@ class DatabaseConnection:
 # result = db.query(query1)
 # db.disconnect()
 # print(result)
-    
-    
+  

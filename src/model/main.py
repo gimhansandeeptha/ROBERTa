@@ -39,6 +39,7 @@ class ModelProcess:
 
     def finetune_process(self, df:pd.DataFrame):
         if df is not None:
+            print("Finetuning conditions are satisfied:", df.head())
             texts = df['text'].values
             sentiment = df["gpt_sentiment"].values
 
@@ -54,6 +55,7 @@ class ModelProcess:
             model_creator.create()
             model_creator.load(checkpoint_path)
 
+            # Finetuning 
             if finetuned_count < self.max_finetuned_count:
                 model_creator.finetune(texts, sentiment_number)
                 current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -61,10 +63,11 @@ class ModelProcess:
                 model_creator.save(new_checkpoint_path)
                 metadata.set_value(['latest','finetune_count'], finetuned_count+1)
                 metadata.set_value(['latest','path'],new_checkpoint_path)
-                os.remove(checkpoint_path)                   
+                os.remove(checkpoint_path)  
+
+            # Validating                 
             else:
                 checkpoint_validation_loss = model_creator.validate(texts, sentiment_number)
-
                 stable_metadata = Metadata(self.stable_metadata_filepath)
                 stable_model_path = stable_metadata.get_value(['path'])
                 stable_save_folder = stable_metadata.get_value(['stable_save_folder'])
@@ -72,12 +75,16 @@ class ModelProcess:
                 new_model_path = os.path.join(stable_save_folder, f"{current_datetime}.pth")
                 stable_validation_loss = float(stable_metadata.get_value(['validation_loss']))
 
+                # if new models loss is low it will be saved as the new stable model
                 if checkpoint_validation_loss < stable_validation_loss:
                     model_creator.save(new_model_path)
                     os.remove(stable_model_path)
                     stable_metadata.set_value(['validation_loss'], checkpoint_validation_loss)
                     stable_metadata.set_value(['path'],new_model_path)
-
+                else:
+                    os.remove(checkpoint_path)  # Remove the finetuned model from the checkpoint folder if it is not improved 
+                    metadata.set_value(['latest','path'], stable_model_path)# set the finetuned model path to the stable model 
+                    
                 metadata.set_value(['latest','finetune_count'], 0)
         else:
             print("Finetuning conditions are not satisfied.")
