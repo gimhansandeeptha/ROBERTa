@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import asyncio
+import multiprocessing
 from apscheduler.schedulers.background import BackgroundScheduler
 from contextlib import asynccontextmanager
 import uvicorn
@@ -27,14 +28,22 @@ async def lifespan(lifespan):
     second = time.second
     # --------------------------------------------------------------------
 
-    schedular.add_job(func=process, trigger="cron", hour=hour, minute=minute, second=second)
-    schedular.add_job(func=finetune, trigger="cron", hour=hour, minute=minute+3, second=second)
+    schedular.add_job(func=inference_process, trigger="cron", hour=hour, minute=minute, second=second)
+    schedular.add_job(func=finetune_process, trigger="cron", hour=hour, minute=minute+3, second=second)
     schedular.start()
     yield
     print("app stopped...")
     schedular.shutdown(wait=False)
 
-def process():
+def inference_process():
+    process = multiprocessing.Process(target=inference)
+    process.start()
+
+def finetune_process():
+    process = multiprocessing.Process(target=finetune)
+    process.start()
+
+def inference():
     '''Run periodically with following tasks:
 
     * Fetch comment from the service-now
@@ -44,9 +53,6 @@ def process():
     * store the local model results in the database
     * store the GPT sentiment in the database
     '''
-    # from src.test import get_mock_data
-    # sentiment_data: SentimentData = get_mock_data()
-
     # ----------------------------- the following part should be uncommented in actual setting ------------------------
     api = API()
     sn_data = ServicenowData()

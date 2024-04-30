@@ -11,10 +11,6 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def train(self, train_loader):
-        pass
-
-    @abstractmethod
     def finetune(self, finetune_loader):
         pass
 

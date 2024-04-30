@@ -39,7 +39,7 @@ class ModelProcess:
 
     def finetune_process(self, df:pd.DataFrame):
         if df is not None:
-            print("Finetuning conditions are satisfied:", df.head())
+            # print("Finetuning conditions are satisfied:", df.head())
             texts = df['text'].values
             sentiment = df["gpt_sentiment"].values
 
@@ -84,7 +84,7 @@ class ModelProcess:
                 else:
                     os.remove(checkpoint_path)  # Remove the finetuned model from the checkpoint folder if it is not improved 
                     metadata.set_value(['latest','path'], stable_model_path)# set the finetuned model path to the stable model 
-                    
+
                 metadata.set_value(['latest','finetune_count'], 0)
         else:
             print("Finetuning conditions are not satisfied.")
