@@ -62,13 +62,14 @@ def inference():
     data_cleaner.clean(sn_data)
 
     model_process= ModelProcess()
-    api_call = APICall()
-    model_process.inference_process(sn_data)
-    api_call.set_gpt_sentiments(sn_data)
-
     database = RobertaDB()
+    
+    model_process.inference_process(sn_data)
     database.insert_cases(sn_data)  # Insert Cases to the database.
-    database.insert_gpt_sentiment(sn_data)  # Insert GPT sentiments to the database.
+
+    api_call = APICall()
+    api_call.set_gpt_sentiments(sn_data)
+    database.insert_gpt_sentiment(sn_data) # Insert GPT sentiments to the database.
 
 def finetune():
     database = RobertaDB()

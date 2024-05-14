@@ -4,10 +4,16 @@ import json
 import os 
 from dotenv import  dotenv_values  , load_dotenv
 from src.servicenow.servicenow_access import service_now_refresh_token
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+)
 
 base_url = "https://wso2sndev.service-now.com/api/wso2/customer_health/get_customer_comments"
 environment_variable_file_path = "src/servicenow/.env"
 
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def request_customer_comments(query_params=None):
     config = dotenv_values(environment_variable_file_path)
     # Retrieve access token and token type from environment variables

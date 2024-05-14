@@ -52,9 +52,10 @@ class RobertaDB:
         while sn_data.next_case():
             while sn_data.next_comment():
                 text = sn_data.get_comment()
-                gpt_sentiment = sn_data.get_gpt_sentiment()
                 created_on = sn_data.get_date()
-                self.database.insert_gpt_sentiment(text, gpt_sentiment, created_on)
+                gpt_sentiment = sn_data.get_gpt_sentiment()
+                if gpt_sentiment in ["Positive", "Negative", "Neutral"]:
+                    self.database.insert_gpt_sentiment(text, gpt_sentiment, created_on)
         
         # After inserting delete the excessive data in the gpt table
         sentiment_count = self.database.get_sentiment_category_count()

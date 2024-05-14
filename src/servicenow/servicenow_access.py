@@ -41,6 +41,7 @@ def authorize(authorization_request: AuthorizationRequest, background_tasks: Bac
 
     # POST request to the token endpoint to get the access token
     authorization_response = requests.post(token_url, data=authorization_params)
+
     # Check if the request was successful
     if authorization_response.status_code == 200:
         # Extract the access token from the response
@@ -96,6 +97,7 @@ def reniew_token(token_request: TokenRequest, background_tasks: BackgroundTasks)
     
         
 def service_now_authorize():
+    print("Hello")
     config = dotenv_values(environment_variable_file_path)
     # Get the client credentials
     client_id =config.get("CLIENT_ID", None) # os.getenv("CLIENT_ID")  
@@ -114,6 +116,7 @@ def service_now_authorize():
     }
 
     authorize(AuthorizationRequest(**authorization_params), BackgroundTasks())
+
 
 
 def service_now_refresh_token():
@@ -157,3 +160,4 @@ def update_env_variables(env_variable_dict:dict, env_file_path:str):
             file.write(f'{key}="{val}"')
 
 # service_now_refresh_token()
+service_now_authorize()
